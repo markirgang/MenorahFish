@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦜 Menorah Fish & Candle Lighting Robot Arm - Hardware Schematic</title>
+    <style>
+        :root {
+            --bg-dark: #0a0d18;
+            --card-bg: #13182b;
+            --card-border: #232d4b;
+            --text-main: #f0f4f8;
+            --text-muted: #8a99ad;
+            --accent-cyan: #00f0ff;
+            --accent-yellow: #ffd700;
+            --accent-green: #00ff88;
+            --accent-red: #ff3344;
+            --font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg-dark); color: var(--text-main); font-family: var(--font-family); padding: 20px; line-height: 1.5; }
+        header { display: flex; justify-content: space-between; align-items: center; background: #131c36; border: 1px solid var(--card-border); padding: 18px 25px; border-radius: 12px; margin-bottom: 20px; }
+        h1 { font-size: 1.5rem; color: var(--accent-cyan); }
+        .subtitle { font-size: 0.85rem; color: var(--text-muted); }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        th { background: #0c1222; color: var(--accent-cyan); font-weight: bold; }
+        tr:hover { background: rgba(0, 240, 255, 0.1); }
+        .btn { background: var(--accent-cyan); color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        code { color: var(--accent-yellow); font-family: monospace; }
+    </style>
+</head>
+<body>
+    <header>
+        <div>
+            <h1>🦜 ANIMATRONIC MENORAH FISH & ROBOT ARM SCHEMATIC</h1>
+            <span class="subtitle">Complete Master Wiring Map for Raspberry Pi, PCA9685 PWM Driver, L298N Motors & Stage</span>
+        </div>
+        <button class="btn" onclick="window.print()">🖨️ Print Schematic</button>
+    </header>
+
+    <div class="grid">
+        <div class="card">
+            <h3 style="color:var(--accent-cyan);">🍓 Raspberry Pi MCU</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:6px;">
+                Controls Web server, Gemini Voice AI, I2C bus (Pin 3 SDA, Pin 5 SCL), L298N drivers & Menorah stage.
+            </p>
+        </div>
+        <div class="card">
+            <h3 style="color:var(--accent-cyan);">🎛️ PCA9685 16-Ch PWM</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:6px;">
+                I2C Address 0x40. Drives 5-DOF Robot Arm, Stage Servos, Spotlights, Domes, and Turntable Base.
+            </p>
+        </div>
+        <div class="card">
+            <h3 style="color:var(--accent-red);">🐟 Dual L298N Motor Drivers</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:6px;">
+                Fish Mouth DC Motor (Lipsync), Neck 3s Outstretched Swing Motor, and Tail Wagging Motor.
+            </p>
+        </div>
+        <div class="card">
+            <h3 style="color:var(--accent-yellow);">🕎 Menorah & Light Domes</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-top:6px;">
+                9 Menorah Candle Light Bulbs (180° Arc) & 4 Breathing Light Domes on stage perimeter.
+            </p>
+        </div>
+    </div>
+
+    <div class="card" style="overflow-x: auto;">
+        <h3 style="color:var(--accent-cyan); margin-bottom:12px;">⚡ Visual Circuit Schematic</h3>
+        <iframe src="wiring_diagram.svg" style="width:100%; height:600px; border:none; border-radius:8px;"></iframe>
+    </div>
+</body>
+</html>

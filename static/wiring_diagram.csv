@@ -1,0 +1,23 @@
+Subsystem / Header,Pin / Channel #,Signal / GPIO Name,Wire Color Code,Target Hardware Module,Terminal / Pin,Function Description
+Raspberry Pi 4/5,Pin 3,GPIO 2 (SDA1),Cyan,PCA9685 PWM Driver,SDA Terminal,I2C Serial Data Bus for 16-Channel Servo Controller
+Raspberry Pi 4/5,Pin 5,GPIO 3 (SCL1),Blue,PCA9685 PWM Driver,SCL Terminal,I2C Serial Clock Line for 16-Channel Servo Controller
+Raspberry Pi 4/5,Pin 12,GPIO 18 (PWM),Magenta,L298N Motor Driver,ENA Terminal,Fish Mouth DC Motor Speed PWM
+Raspberry Pi 4/5,Pin 16,GPIO 23,Blue,L298N Motor Driver,IN1 Terminal,Fish Mouth Direction 1 (Forward Polarity Lipsync)
+Raspberry Pi 4/5,Pin 18,GPIO 24,Blue,L298N Motor Driver,IN2 Terminal,Fish Mouth Direction 2 (Forward Polarity Lipsync)
+Raspberry Pi 4/5,Pin 35,GPIO 19 (PWM),Magenta,L298N Motor Driver,ENB Terminal,Fish Body & Tail DC Motors Speed PWM
+Raspberry Pi 4/5,Pin 22,GPIO 25,Green,L298N Motor Driver,IN3 Terminal,Fish Body 3s PWM Ramp (Fwd) / Tail Wag (Rev Polarity)
+Raspberry Pi 4/5,Pin 24,GPIO 8,Green,L298N Motor Driver,IN4 Terminal,Fish Body 3s PWM Ramp (Fwd) / Tail Wag (Rev Polarity)
+PCA9685 PWM Driver,Channel 0,PWM Servo Out,Red,Robot Arm Joint 1,Base Yaw Servo,Robot Arm Base Rotation (-90 to +90 deg)
+PCA9685 PWM Driver,Channel 1,PWM Servo Out,Red,Robot Arm Joint 2,Shoulder Servo,Robot Arm Shoulder Pitch (-90 to +90 deg)
+PCA9685 PWM Driver,Channel 2,PWM Servo Out,Red,Robot Arm Joint 3,Elbow Servo,Robot Arm Elbow Pitch (-135 to +135 deg)
+PCA9685 PWM Driver,Channel 3,PWM Servo Out,Gold,Stage Servo 1,Mouth-Side Servo & Dreidel,Sweeps Mouth-Side Servo & Spinning Dreidel on Stage
+PCA9685 PWM Driver,Channel 4,PWM Servo Out,Gold,Stage Servo 2,Tail-Side Servo & Dreidel,Sweeps Tail-Side Servo & Spinning Dreidel on Stage
+PCA9685 PWM Driver,Channel 5,PWM Servo Out,Magenta,Robot Arm Joint 4/5,Wrist & Claw,Robot Arm Wrist & Gripper Candle Claw
+PCA9685 PWM Driver,Channel 6,PWM Dimmer Out,Yellow,Center Shamash Candle,Light Bulb Dimmer,Center Shamash Menorah Candle Light Bulb
+PCA9685 PWM Driver,Channel 7,PWM Dimmer Out,Yellow,Side Candles 1-4,Light Bulbs Dimmer,Side Candles 1 to 4 Light Bulbs
+PCA9685 PWM Driver,Channel 8,PWM Dimmer Out,Yellow,Side Candles 5-8,Light Bulbs Dimmer,Side Candles 5 to 8 Light Bulbs
+PCA9685 PWM Driver,Channel 9,PWM Servo Out,Cyan,Fish Head Spotlight,Pan Servo,Fish Head Spotlight Horizontal Pan Servo
+PCA9685 PWM Driver,Channel 10,PWM Servo Out,Cyan,Fish Head Spotlight,Tilt Servo,Fish Head Spotlight Vertical Tilt Servo
+PCA9685 PWM Driver,Channel 11,PWM Dimmer Out,Purple,4 Stage Light Domes,Light Domes Dimmer,4 Stage Light Domes Breathing Pulse Sequence
+Power Rail,+5V / +6V,DC Power Rail,Red,PCA9685 V+ & L298N Power,Screw Terminals,High-Current 12A Power Supply for Servos and Motors
+Power Rail,GND Bus,Common Ground,Black,All Boards & Pi GND,Ground Bus,Shared Common Reference Ground Bus across all Modules

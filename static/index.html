@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦜 Menorah Fish & Candle Lighting Robot Arm Master Control</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+:root {
+    --bg-dark: #0a0d18;
+    --card-bg: #13182b;
+    --card-border: #232d4b;
+    --text-main: #f0f4f8;
+    --text-muted: #8a99ad;
+    --accent-cyan: #00f0ff;
+    --accent-magenta: #ff0077;
+    --accent-yellow: #ffd700;
+    --accent-green: #00ff88;
+    --accent-red: #ff3344;
+    --accent-purple: #a855f7;
+    --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-family);
+    line-height: 1.5;
+    padding: 15px;
+    min-height: 100vh;
+}
+
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #182038, #0f1526);
+    border: 1px solid var(--card-border);
+    padding: 15px 25px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.header-title h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-yellow), var(--accent-magenta));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+}
+
+.header-title .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.header-status {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.status-badge {
+    background: rgba(0, 255, 136, 0.15);
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.btn-export {
+    background: linear-gradient(135deg, var(--accent-cyan), #00a8ff);
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-export:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,240,255,0.4);
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 20px;
+}
+
+@media (max-width: 1200px) {
+    .main-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sync-switch-card, .canvas-card, .ai-performance-card, .panel-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding-bottom: 8px;
+}
+
+.card-header h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.card-badge {
+    font-size: 0.75rem;
+    background: rgba(255,255,255,0.08);
+    color: var(--accent-cyan);
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.parrots-controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 900px) {
+    .parrots-controls-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mp3-lipsync-card {
+    border: 1px solid var(--accent-magenta);
+    background: linear-gradient(135deg, #181328, #0f1022);
+}
+
+.mp3-player-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    align-items: center;
+}
+
+@media (max-width: 900px) {
+    .mp3-player-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.playlist-select-group label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
+
+.select-upload-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.song-dropdown {
+    flex: 1;
+    background: #080b14;
+    color: var(--accent-yellow);
+    border: 1px solid var(--card-border);
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.btn-upload {
+    background: linear-gradient(135deg, #ff0077, #ff5500);
+    color: #ffffff;
+    border: 2px solid #ff66b3;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    box-shadow: 0 0 15px rgba(255, 0, 119, 0.5);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-upload:hover {
+    background: linear-gradient(135deg, #ff3399, #ff7700);
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 0 25px rgba(255, 0, 119, 0.8);
+}
+
+.transport-btn-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.btn-transport {
+    flex: 1;
+    background: #080b14;
+    border: 1px solid var(--card-border);
+    color: #fff;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-transport:hover {
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+}
+
+.progress-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-family: monospace;
+    color: var(--text-muted);
+}
+
+.progress-bar {
+    flex: 1;
+    accent-color: var(--accent-magenta);
+}
+
+.sync-switch-card {
+    border: 2px solid var(--accent-cyan);
+    background: linear-gradient(135deg, #131c36, #0e1529);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+}
+
+.sync-switch-header {
+    margin-bottom: 15px;
+}
+
+.sync-switch-header h3 {
+    font-size: 1.15rem;
+    color: var(--accent-cyan);
+}
+
+.sync-switch-info {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.active-speaker-indicator {
+    text-align: center;
+    font-size: 0.9rem;
+    margin-top: 10px;
+    color: var(--text-muted);
+    background: rgba(0,0,0,0.25);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.active-speaker-indicator strong {
+    color: var(--accent-yellow);
+}
+
+.canvas-container {
+    width: 100%;
+    height: 380px;
+    min-height: 360px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #000;
+    position: relative;
+    border: 1px solid var(--card-border);
+}
+
+.canvas-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+}
+
+.ai-controls-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+    .ai-controls-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mic-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-magenta), #cc0055);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.mic-vu-bar {
+    width: 100%;
+    height: 10px;
+    background: #080b14;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.vu-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-yellow), var(--accent-red));
+    transition: width 0.05s linear;
+}
+
+.chat-input-group {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input {
+    flex: 1;
+    background: #080b14;
+    border: 1px solid var(--card-border);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+}
+
+.btn-action {
+    background: linear-gradient(135deg, var(--accent-yellow), #ffaa00);
+    color: #000;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.ai-response-box {
+    background: #080b14;
+    border: 1px dashed var(--card-border);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    min-height: 55px;
+    color: #e0e6ed;
+}
+
+.source-select {
+    background: #080b14;
+    color: var(--accent-cyan);
+    border: 1px solid var(--card-border);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+.camera-preview {
+    width: 100%;
+    height: 200px;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.camera-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.control-group {
+    margin-bottom: 14px;
+}
+
+.control-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-toggle {
+    flex: 1;
+    background: #080b14;
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-toggle.active {
+    background: rgba(0, 240, 255, 0.15);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+}
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+}
+
+.slider-row span:first-child {
+    width: 110px;
+    color: var(--text-muted);
+}
+
+.slider-row input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent-cyan);
+}
+
+.slider-row span:last-child {
+    width: 40px;
+    text-align: right;
+    font-family: monospace;
+    color: var(--accent-yellow);
+}
+
+.small-bird-box {
+    background: #080b14;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.small-bird-box h4 {
+    font-size: 0.8rem;
+    color: var(--accent-yellow);
+    text-align: center;
+}
+
+.nav-tabs-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.nav-tab-btn {
+    flex: 1;
+    background: #13182b;
+    border: 1px solid var(--card-border);
+    color: var(--text-muted);
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 1.0rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.nav-tab-btn.active {
+    background: linear-gradient(135deg, #1d2747, #131b33);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+}
+
+.nav-tab-btn:hover {
+    border-color: var(--accent-cyan);
+    color: #fff;
+}
+
+.config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .config-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.config-card {
+    border: 1px solid #2d3b66;
+    background: linear-gradient(135deg, #13182b, #0c101d);
+}
+
+.config-select {
+    width: 100%;
+    background: #080b14;
+    color: var(--accent-cyan);
+    border: 1px solid var(--card-border);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.btn-step {
+    background: #0d1527;
+    border: 1px solid var(--card-border);
+    color: var(--accent-cyan);
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.btn-step:hover {
+    background: var(--accent-cyan);
+    color: #000;
+    box-shadow: 0 0 8px var(--accent-cyan);
+}
+    </style>
+    <!-- Three.js & OrbitControls -->
+    <script src="/lib/three.min.js"></script>
+    <script src="/lib/OrbitControls.js"></script>
+    <script>
+        function switchTab(targetTabId) {
+            if (!targetTabId) return;
+            var panes = document.querySelectorAll('.tab-pane');
+            for (var i = 0; i < panes.length; i++) {
+                panes[i].style.display = 'none';
+                panes[i].classList.remove('active');
+            }
+            var btns = document.querySelectorAll('.nav-tab-btn');
+            for (var j = 0; j < btns.length; j++) {
+                btns[j].classList.remove('active');
+            }
+            var targetPane = document.getElementById(targetTabId);
+            if (targetPane) {
+                targetPane.style.display = 'block';
+                targetPane.classList.add('active');
+            }
+            var matchingBtns = document.querySelectorAll('.nav-tab-btn[data-tab="' + targetTabId + '"]');
+            for (var k = 0; k < matchingBtns.length; k++) {
+                matchingBtns[k].classList.add('active');
+            }
+            if (targetTabId === 'tabWiring' && typeof initWiringDiagramEngine === 'function') {
+                initWiringDiagramEngine();
+            } else if (targetTabId === 'tabConfig' && typeof populateMediaDevices === 'function') {
+                populateMediaDevices();
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header Bar -->
+        <header class="app-header">
+            <div class="header-title">
+                <h1>🦜 ANIMATRONIC MENORAH FISH & CANDLE ROBOT ARM</h1>
+                <span class="subtitle">Master Hanukkah Show Controller & AI Synchronized Performance Stage</span>
+            </div>
+            <div class="header-status">
+                <span class="status-badge" id="systemStatus">🟢 ONLINE (Port 1390)</span>
+                <button class="btn-export" id="btnExportCode">📥 Download Python Script</button>
+            </div>
+        </header>
+
+        <!-- Navigation Tab Bar -->
+        <nav class="nav-tabs-bar">
+            <button class="nav-tab-btn active" id="tabBtnStage" data-tab="tabStage" onclick="switchTab('tabStage')">🎭 Main Stage & Menorah Show Controls</button>
+            <button class="nav-tab-btn" id="tabBtnWiring" data-tab="tabWiring" onclick="switchTab('tabWiring')">🛠️ Hardware & Wiring Diagrams</button>
+            <button class="nav-tab-btn" id="tabBtnCalib" data-tab="tabCalib" onclick="switchTab('tabCalib')">🔧 Servo Calibration & Hardware Output Tests</button>
+            <button class="nav-tab-btn" id="tabBtnConfig" data-tab="tabConfig" onclick="switchTab('tabConfig')">⚙️ System Configuration (Camera, Mic, Audio & Voice)</button>
+        </nav>
+
+        <!-- Tab 1: Main Stage & Show Controls Pane -->
+        <div id="tabStage" class="tab-pane active">
+            <div class="main-layout">
+                <!-- Left Side: 3D Stage & Menorah Lighting Controls -->
+                <div class="stage-section">
+                    <!-- 3D Stage Visualizer & Hardware Telemetry HUD (TOP OF PAGE) -->
+                    <div class="canvas-card">
+                        <div class="card-header" style="flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <h3>🎭 REAL-TIME 3D STAGE VISUALIZER & HARDWARE PREDICTION HUD</h3>
+                                <span class="card-badge">Three.js Hardware Digital Twin</span>
+                            </div>
+                            <!-- Camera Preset Buttons -->
+                            <div class="btn-group">
+                                <button class="btn-toggle active" id="btnCamViewDefault">👁️ 3D Perspective</button>
+                                <button class="btn-toggle" id="btnCamViewTop">🦅 Top-Down Arc View</button>
+                                <button class="btn-toggle" id="btnCamViewFish">🐟 Fish Focus</button>
+                                <button class="btn-toggle" id="btnCamViewArm">🦾 Arm & Candles</button>
+                            </div>
+                        </div>
+                        <div id="stage3dContainer" class="canvas-container"></div>
+
+                        <!-- Real-Time Hardware Signal Telemetry HUD Panel -->
+                        <div style="margin-top: 12px; padding: 12px; background: #080d1a; border: 1px solid var(--card-border); border-radius: 8px;">
+                            <div style="font-size: 0.8rem; font-weight: bold; color: var(--accent-cyan); margin-bottom: 8px;">
+                                📊 HARDWARE OUTPUT TELEMETRY & PHYSICAL ACTUATION MONITOR:
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; font-size: 0.78rem; font-family: monospace;">
+                                <div style="background: rgba(0, 240, 255, 0.06); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(0,240,255,0.2);">
+                                    <span style="color:var(--text-muted);">Fish Mouth (L298 ChA):</span><br>
+                                    <strong id="hudMouthText" style="color:var(--accent-cyan);">IDLE (Mouth Closed)</strong>
+                                </div>
+                                <div style="background: rgba(0, 255, 136, 0.06); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(0,255,136,0.2);">
+                                    <span style="color:var(--text-muted);">Neck Swing (L298 ChB):</span><br>
+                                    <strong id="hudNeckText" style="color:var(--accent-green);">0% PWM (0.0s Retracted)</strong>
+                                </div>
+                                <div style="background: rgba(255, 215, 0, 0.06); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,215,0,0.2);">
+                                    <span style="color:var(--text-muted);">Fish Tail (L298 #2 ChA):</span><br>
+                                    <strong id="hudTailText" style="color:var(--accent-yellow);">OFF (Idle Burst Mode)</strong>
+                                </div>
+                                <div style="background: rgba(255, 0, 119, 0.06); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,0,119,0.2);">
+                                    <span style="color:var(--text-muted);">Robot Arm Servos (PCA 0-4):</span><br>
+                                    <strong id="hudArmText" style="color:var(--accent-magenta);">J1: 0° | J2: 30° | J3: 45°</strong>
+                                </div>
+                                <div style="background: rgba(168, 85, 247, 0.06); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(168,85,247,0.2);">
+                                    <span style="color:var(--text-muted);">Menorah Lit Bulbs:</span><br>
+                                    <strong id="hudMenorahText" style="color:var(--accent-purple);">Center Shamash + 0 Side</strong>
+                                </div>
+                                <div style="background: rgba(255, 153, 0, 0.06); padding: 6px 10px; border-radius: 6px; border: 1px solid rgba(255,153,0,0.2);">
+                                    <span style="color:var(--text-muted);">Stage Light Domes:</span><br>
+                                    <strong id="hudDomesText" style="color:var(--accent-yellow);">Steady 100% Illumination</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MENORAH CANDLE LIGHTING QUICK SELECTOR CARD -->
+                    <div class="sync-switch-card">
+                        <div class="sync-switch-header">
+                            <h3>🕎 HANUKKAH MENORAH CANDLE LIGHTING SELECTOR</h3>
+                            <span class="sync-switch-info">Select the number of candles to light. Robot arm will extinguish all candles and light the requested candles!</span>
+                        </div>
+                        
+                        <div class="btn-group" style="flex-wrap: wrap; gap: 8px; margin: 12px 0;">
+                            <button class="btn-action btn-light-candle" data-count="1">🕯️ 1 Candle</button>
+                            <button class="btn-action btn-light-candle" data-count="2">🕯️ 2 Candles</button>
+                            <button class="btn-action btn-light-candle" data-count="3">🕯️ 3 Candles</button>
+                            <button class="btn-action btn-light-candle" data-count="4">🕯️ 4 Candles</button>
+                            <button class="btn-action btn-light-candle" data-count="5">🕯️ 5 Candles</button>
+                            <button class="btn-action btn-light-candle" data-count="6">🕯️ 6 Candles</button>
+                            <button class="btn-action btn-light-candle" data-count="7">🕯️ 7 Candles</button>
+                            <button class="btn-action btn-light-candle" data-count="8" style="background: linear-gradient(135deg, var(--accent-yellow), #ff9900);">🕎 ALL 8 CANDLES</button>
+                            <button class="btn-primary btn-light-candle" data-count="0" style="background: linear-gradient(135deg, var(--accent-red), #aa0000);">🛑 Extinguish All</button>
+                        </div>
+                        <div class="active-speaker-indicator">
+                            Current Menorah State: <strong id="menorahStatusText">Center Shamash + 0 Side Candles Lit</strong>
+                        </div>
+                    </div>
+
+                    <!-- AI Voice Microphone, Live VU Meter & Talk to Fish -->
+                    <div class="ai-performance-card">
+                        <div class="card-header">
+                            <h3>🎙️ TALK TO THE MENORAH FISH (MIC & LIVE VU METER)</h3>
+                            <span class="card-badge">Gemini Voice & Vision AI</span>
+                        </div>
+                        
+                        <div class="ai-controls-grid">
+                            <div class="mic-section">
+                                <button class="btn-primary" id="btnMicToggle">🎙️ Start Voice Mic</button>
+                                <div class="mic-vu-bar">
+                                    <div class="vu-fill" id="vuFill"></div>
+                                </div>
+                                <div class="slider-row" style="margin-top: 6px;">
+                                    <span>Mic Sensitivity:</span>
+                                    <input type="range" min="5" max="50" value="15" id="micSensitivitySlider">
+                                    <span id="micSensitivityVal">15%</span>
+                                </div>
+                            </div>
+
+                            <div class="chat-input-group">
+                                <input type="text" id="aiPromptInput" placeholder="Ask the fish to light 4 Hanukkah candles, tell a joke, or sing..." class="chat-input">
+                                <button class="btn-action" id="btnSendChat">Perform / Speak</button>
+                            </div>
+                        </div>
+
+                        <div class="ai-response-box" id="aiResponseBox">
+                            <em>Welcome to the Animatronic Menorah Fish & Candle Robot Arm Stage! Click "Start Voice Mic" or type a prompt to ask the fish to light candles or perform!</em>
+                        </div>
+                    </div>
+
+                    <!-- Fish & Robot Arm Controls Side-by-Side Grid -->
+                    <div class="parrots-controls-grid">
+                        <!-- Animatronic Fish Controls -->
+                        <div class="panel-card parrot-card">
+                            <div class="card-header">
+                                <h3 style="color:#00e5ff;">🐟 ANIMATRONIC FISH MECHANICS</h3>
+                                <span class="card-badge">L298 Ch A & B + Servos</span>
+                            </div>
+
+                            <div class="control-group">
+                                <label>L298 Channel A (Fish Mouth DC Motor):</label>
+                                <button class="btn-toggle" id="btnFishMouth">👄 Mouth Open / Lipsync</button>
+                            </div>
+
+                            <div class="control-group">
+                                <label>L298 Channel B (Neck 3s Outstretched Swing Motor):</label>
+                                <button class="btn-toggle" id="btnFishNeckSwing">🦒 Trigger 3s Neck Swing Out/In</button>
+                            </div>
+
+                            <div class="control-group">
+                                <label>L298 Channel B Rev Polarity (Tail Wagging Motor):</label>
+                                <button class="btn-toggle" id="btnFishTailWag">🐟 Wag Fish Tail ON/OFF</button>
+                            </div>
+
+                            <div class="control-group">
+                                <label>Fish Head Spotlight & Stage Dreidel Servos:</label>
+                                <button class="btn-toggle" id="btnFishSpotlight">💡 Head Spotlight ON/OFF</button>
+                                <button class="btn-toggle" id="btnDreidelsSweep" style="margin-top:4px;">🔄 Sweep Dreidel Left & Right Servos</button>
+                            </div>
+                        </div>
+
+                        <!-- 5-DOF Robot Arm Controls -->
+                        <div class="panel-card parrot-card">
+                            <div class="card-header">
+                                <h3 style="color:#ffd700;">🦾 5-DOF ROBOT ARM & CANDLE CLAW</h3>
+                                <span class="card-badge">PCA Ch 0 - 5</span>
+                            </div>
+
+                            <div class="control-group">
+                                <label>Robot Arm Joint Sliders:</label>
+                                <div class="slider-row">
+                                    <span style="font-size:0.78rem;">Base Yaw (J1):</span>
+                                    <button class="btn-step" onclick="adjustOffset('armJ1', -1)">-</button>
+                                    <input type="range" min="-90" max="90" value="0" id="armJ1">
+                                    <button class="btn-step" onclick="adjustOffset('armJ1', 1)">+</button>
+                                    <span id="armJ1Val" style="width:38px; text-align:right;">0°</span>
+                                </div>
+                                <div class="slider-row">
+                                    <span style="font-size:0.78rem;">Shoulder (J2):</span>
+                                    <button class="btn-step" onclick="adjustOffset('armJ2', -1)">-</button>
+                                    <input type="range" min="-90" max="90" value="30" id="armJ2">
+                                    <button class="btn-step" onclick="adjustOffset('armJ2', 1)">+</button>
+                                    <span id="armJ2Val" style="width:38px; text-align:right;">30°</span>
+                                </div>
+                                <div class="slider-row">
+                                    <span style="font-size:0.78rem;">Elbow (J3):</span>
+                                    <button class="btn-step" onclick="adjustOffset('armJ3', -1)">-</button>
+                                    <input type="range" min="-135" max="135" value="45" id="armJ3">
+                                    <button class="btn-step" onclick="adjustOffset('armJ3', 1)">+</button>
+                                    <span id="armJ3Val" style="width:38px; text-align:right;">45°</span>
+                                </div>
+                                <div class="slider-row">
+                                    <span style="font-size:0.78rem;">Wrist (J4):</span>
+                                    <button class="btn-step" onclick="adjustOffset('armJ4', -1)">-</button>
+                                    <input type="range" min="-90" max="90" value="0" id="armJ4">
+                                    <button class="btn-step" onclick="adjustOffset('armJ4', 1)">+</button>
+                                    <span id="armJ4Val" style="width:38px; text-align:right;">0°</span>
+                                </div>
+                                <div class="slider-row">
+                                    <span style="font-size:0.78rem;">Gripper (J5):</span>
+                                    <button class="btn-step" onclick="adjustOffset('armJ5', -1)">-</button>
+                                    <input type="range" min="0" max="100" value="50" id="armJ5">
+                                    <button class="btn-step" onclick="adjustOffset('armJ5', 1)">+</button>
+                                    <span id="armJ5Val" style="width:38px; text-align:right;">50%</span>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label>Claw Candle Light Bulb:</label>
+                                <button class="btn-toggle active" id="btnClawCandle">🕯️ Claw Candle Flickering Flame (ALWAYS ON)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Camera & MP3 Lipsync Controls Under Video Window -->
+                <div class="controls-section">
+                    <div class="panel-card">
+                        <div class="card-header">
+                            <h3>📹 STAGE CAMERA FEED</h3>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <select id="camSourceSelect" class="source-select">
+                                    <option value="usb">USB Webcam 1 (/dev/video0)</option>
+                                    <option value="1">USB Webcam 2 (/dev/video1)</option>
+                                    <option value="csi">Raspberry Pi CSI Camera</option>
+                                    <option value="virtual">Virtual Stage Feed</option>
+                                </select>
+                                <button class="btn-action" id="btnResetCam" style="padding:4px 8px; font-size:0.75rem;">🔄 Reset</button>
+                            </div>
+                        </div>
+                        <div class="camera-preview">
+                            <img id="camFeed" src="/api/camera/frame" alt="Stage Camera Feed">
+                        </div>
+                    </div>
+
+                    <!-- MP3 SONG PLAYLIST & ANIMATRONIC LIPSYNC CONTROLS (UNDER VIDEO WINDOW) -->
+                    <div class="panel-card mp3-lipsync-card">
+                        <div class="card-header">
+                            <h3>🎵 MP3 PLAYLIST & ANIMATRONIC LIPSYNC PANEL</h3>
+                            <span class="card-badge" id="lipsyncBadge">🎶 Web Audio Lipsync Engine</span>
+                        </div>
+
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            <div class="playlist-select-group">
+                                <label for="songSelect">Select Song Playlist:</label>
+                                <div class="select-upload-row">
+                                    <select id="songSelect" class="song-dropdown">
+                                        <option value="">-- Choose Song --</option>
+                                    </select>
+                                    <label for="fileUploadInput" class="btn-upload" style="padding:8px 14px; font-size:0.85rem;">
+                                        📁 Upload MP3
+                                        <input type="file" id="fileUploadInput" accept="audio/*" style="display:none;">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="player-controls-group">
+                                <div class="transport-btn-row">
+                                    <button class="btn-transport" id="btnSongPlay">▶️ Play & Sync</button>
+                                    <button class="btn-transport" id="btnSongPause">⏸️ Pause</button>
+                                    <button class="btn-transport" id="btnSongStop">⏹️ Stop</button>
+                                </div>
+
+                                <div class="progress-row">
+                                    <span id="currTimeText">00:00</span>
+                                    <input type="range" min="0" max="100" value="0" id="songProgressBar" class="progress-bar">
+                                    <span id="durTimeText">00:00</span>
+                                </div>
+                            </div>
+
+                            <!-- Expanded Animatronic Lipsync Tuning Controls -->
+                            <div class="lipsync-settings-group" style="background: rgba(0,0,0,0.3); padding:10px; border-radius:8px; border: 1px solid var(--card-border);">
+                                <label style="font-size:0.8rem; font-weight:bold; color:var(--accent-yellow); margin-bottom:6px; display:block;">🎛️ Animatronic Lipsync Tuning Controls:</label>
+                                <div class="slider-row">
+                                    <span>Vocal Lipsync Gain:</span>
+                                    <input type="range" min="10" max="200" value="45" id="lipsyncGainSlider">
+                                    <span id="lipsyncGainVal">45%</span>
+                                </div>
+                                <div class="slider-row">
+                                    <span>Music Volume:</span>
+                                    <input type="range" min="0" max="100" value="80" id="songVolumeSlider">
+                                    <span id="songVolumeVal">80%</span>
+                                </div>
+                                <div class="slider-row">
+                                    <span>Tail Beat Sensitivity:</span>
+                                    <input type="range" min="0" max="100" value="70" id="tailPulseGainSlider">
+                                    <span id="tailPulseGainVal">70%</span>
+                                </div>
+                                <div class="control-group" style="margin-top:6px; margin-bottom:6px;">
+                                    <label>Frequency Band Focus:</label>
+                                    <select id="lipsyncBandSelect" class="config-select" style="padding:6px; font-size:0.8rem;">
+                                        <option value="vocal" selected>🎤 Vocal Lead (300Hz - 3.5kHz)</option>
+                                        <option value="full">🌐 Full Spectrum (50Hz - 8kHz)</option>
+                                        <option value="bass">🥁 Bass Beats (40Hz - 250Hz)</option>
+                                    </select>
+                                </div>
+                                <div class="control-group" style="margin-top:6px; margin-bottom:6px;">
+                                    <label>Mouth Opening Threshold:</label>
+                                    <select id="lipsyncThreshSelect" class="config-select" style="padding:6px; font-size:0.8rem;">
+                                        <option value="25" selected>Medium Sensitivity (25%)</option>
+                                        <option value="10">Low Threshold / Sensitive (10%)</option>
+                                        <option value="45">High Threshold / Loud Only (45%)</option>
+                                    </select>
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                                    <button class="btn-toggle active" id="btnAutoNeckSwing">🦒 Neck 3s Outstretched Swing Sync ON</button>
+                                    <button class="btn-toggle active" id="btnAutoDomeBreathing">🎆 Light Domes Breathing Sync ON</button>
+                                    <button class="btn-toggle active" id="btnAutoDreidelsSpin">🕎 Spinning Dreidels Servo Sync ON</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Hardware & Wiring Diagrams Pane -->
+        <div id="tabWiring" class="tab-pane" style="display: none;">
+            <div class="sync-switch-card" style="border-color: var(--accent-cyan); background: linear-gradient(135deg, #101a33, #080f22); margin-bottom: 20px;">
+                <div class="card-header" style="border:none; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3 style="color: var(--accent-cyan); font-size: 1.3rem;">🔌 MASTER HARDWARE WIRING DIAGRAM & GPIO PINOUT SCHEMATIC</h3>
+                        <span class="sync-switch-info">Interactive schematic for Raspberry Pi 4/5, PCA9685 16-Ch PWM Servo Kit, L298N Motor Drivers, Relays & Power Rails</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-export" id="btnDownloadPdf" style="background: linear-gradient(135deg, var(--accent-yellow), #ff9900); color: #000;">📄 Save PDF Schematic</button>
+                        <button class="btn-export" id="btnDownloadCsv" style="background: linear-gradient(135deg, var(--accent-green), #00cc66); color: #000;">📊 Export CSV Spreadsheet</button>
+                        <button class="btn-export" id="btnDownloadSvg" style="background: linear-gradient(135deg, var(--accent-cyan), #0088ff); color: #000;">📥 Export SVG Diagram</button>
+                    </div>
+                </div>
+
+                <div class="wiring-toolbar">
+                    <div class="wire-filter-group">
+                        <span class="filter-label">Filter Subsystem:</span>
+                        <button class="wire-filter-btn active" data-filter="all">🌐 All Wires</button>
+                        <button class="wire-filter-btn" data-filter="power">⚡ Power & Common GND</button>
+                        <button class="wire-filter-btn" data-filter="i2c">📡 I2C / PCA9685</button>
+                        <button class="wire-filter-btn" data-filter="l298">⚙️ L298N Motor Drivers</button>
+                        <button class="wire-filter-btn" data-filter="relays">🐥 Relays & Motors</button>
+                        <button class="wire-filter-btn" data-filter="servos">🔄 Servos & Spotlights</button>
+                    </div>
+                    <div class="search-pin-group">
+                        <input type="text" id="pinSearchInput" placeholder="🔍 Search Pin #, GPIO or Component (e.g. GPIO 18, L298, Ch 0)..." class="chat-input" style="padding: 8px 12px; font-size: 0.85rem;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual SVG Diagram Card -->
+            <div class="panel-card" style="padding: 15px; overflow-x: auto; position: relative;">
+                <div class="card-header">
+                    <h3>⚡ INTERACTIVE HARDWARE CIRCUIT SCHEMATIC</h3>
+                    <span class="card-badge" id="wireFilterBadge">Showing All Connections</span>
+                </div>
+                <div id="svgContainer" class="svg-schematic-wrapper">
+                    <svg id="wiringSvg" viewBox="0 0 1350 920" xmlns="http://www.w3.org/2000/svg" style="width: 100%; min-width: 1000px; height: auto; background: #060913; border-radius: 8px;">
+                        <defs>
+                            <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feMerge>
+                                    <feMergeNode in="blur" />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                            <filter id="glowYellow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="3" result="blur" />
+                                <feMerge>
+                                    <feMergeNode in="blur" />
+                                    <feMergeNode in="SourceGraphic" />
+                                </feMerge>
+                            </filter>
+                        </defs>
+
+                        <!-- GRID BACKGROUND -->
+                        <pattern id="gridPattern" width="30" height="30" patternUnits="userSpaceOnUse">
+                            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1" />
+                        </pattern>
+                        <rect width="100%" height="100%" fill="url(#gridPattern)" />
+
+                        <!-- 1. POWER SUPPLY MODULE -->
+                        <g id="modPower">
+                            <rect x="40" y="30" width="280" height="130" rx="10" fill="#141c2e" stroke="#ff3344" stroke-width="2" />
+                            <rect x="40" y="30" width="280" height="30" rx="10" fill="#ff3344" opacity="0.2" />
+                            <text x="180" y="52" fill="#ff5566" font-weight="bold" font-size="14" text-anchor="middle">🔋 MAIN DUAL POWER SUPPLY</text>
+                            <rect x="60" y="80" width="110" height="35" rx="5" fill="#1f0f13" stroke="#ff3344" />
+                            <text x="115" y="102" fill="#ff8899" font-size="11" font-weight="bold" text-anchor="middle">+5V / +6V 12A (Servos)</text>
+                            <rect x="190" y="80" width="110" height="35" rx="5" fill="#0f1923" stroke="#00f0ff" />
+                            <text x="245" y="102" fill="#00f0ff" font-size="11" font-weight="bold" text-anchor="middle">+5V 3A (Raspberry Pi)</text>
+                            <rect x="125" y="125" width="110" height="25" rx="4" fill="#111" stroke="#aaaaaa" />
+                            <text x="180" y="142" fill="#ffffff" font-size="10" font-weight="bold" text-anchor="middle">⚡ COMMON GND BUS</text>
+                        </g>
+
+                        <!-- 2. RASPBERRY PI 40-PIN HEADER BLOCK -->
+                        <g id="modPi">
+                            <rect x="40" y="190" width="300" height="690" rx="12" fill="#0e1828" stroke="#00f0ff" stroke-width="2" />
+                            <rect x="40" y="190" width="300" height="36" rx="12" fill="#00f0ff" opacity="0.2" />
+                            <text x="190" y="214" fill="#00f0ff" font-weight="bold" font-size="15" text-anchor="middle">🍓 RASPBERRY PI 40-PIN GPIO HEADER</text>
+                            
+                            <rect x="55" y="240" width="125" height="26" rx="4" fill="#1a233a" stroke="#ffaa00" />
+                            <text x="117" y="257" fill="#ffaa00" font-size="10" font-weight="bold" text-anchor="middle">Pin 1: 3.3V Power</text>
+                            <rect x="195" y="240" width="130" height="26" rx="4" fill="#2a141a" stroke="#ff3344" />
+                            <text x="260" y="257" fill="#ff5566" font-size="10" font-weight="bold" text-anchor="middle">Pin 2: 5V Power</text>
+
+                            <rect x="55" y="272" width="125" height="26" rx="4" fill="#002b3d" stroke="#00f0ff" class="pin-box" data-pin="3" />
+                            <text x="117" y="289" fill="#00f0ff" font-size="10" font-weight="bold" text-anchor="middle">Pin 3: GPIO 2 (SDA1)</text>
+                            <rect x="195" y="272" width="130" height="26" rx="4" fill="#2a141a" stroke="#ff3344" />
+                            <text x="260" y="289" fill="#ff5566" font-size="10" font-weight="bold" text-anchor="middle">Pin 4: 5V Power</text>
+
+                            <rect x="55" y="304" width="125" height="26" rx="4" fill="#002b3d" stroke="#00f0ff" class="pin-box" data-pin="5" />
+                            <text x="117" y="321" fill="#00f0ff" font-size="10" font-weight="bold" text-anchor="middle">Pin 5: GPIO 3 (SCL1)</text>
+                            <rect x="195" y="304" width="130" height="26" rx="4" fill="#181818" stroke="#aaaaaa" class="pin-box" data-pin="6" />
+                            <text x="260" y="321" fill="#cccccc" font-size="10" font-weight="bold" text-anchor="middle">Pin 6: Ground (GND)</text>
+
+                            <rect x="55" y="336" width="125" height="26" rx="4" fill="#290022" stroke="#ff00cc" class="pin-box" data-pin="12" />
+                            <text x="117" y="353" fill="#ff00cc" font-size="10" font-weight="bold" text-anchor="middle">Pin 12: GPIO 18 (Mouth ENA)</text>
+                            <rect x="195" y="336" width="130" height="26" rx="4" fill="#181818" stroke="#aaaaaa" class="pin-box" data-pin="14" />
+                            <text x="260" y="353" fill="#cccccc" font-size="10" font-weight="bold" text-anchor="middle">Pin 14: Ground (GND)</text>
+
+                            <rect x="55" y="368" width="125" height="26" rx="4" fill="#001a33" stroke="#3399ff" class="pin-box" data-pin="16" />
+                            <text x="117" y="385" fill="#3399ff" font-size="10" font-weight="bold" text-anchor="middle">Pin 16: GPIO 23 (Mouth IN1)</text>
+                            <rect x="195" y="368" width="130" height="26" rx="4" fill="#001a33" stroke="#3399ff" class="pin-box" data-pin="18" />
+                            <text x="260" y="385" fill="#3399ff" font-size="10" font-weight="bold" text-anchor="middle">Pin 18: GPIO 24 (Mouth IN2)</text>
+
+                            <rect x="55" y="400" width="125" height="26" rx="4" fill="#002b20" stroke="#00ff88" class="pin-box" data-pin="22" />
+                            <text x="117" y="417" fill="#00ff88" font-size="10" font-weight="bold" text-anchor="middle">Pin 22: GPIO 25 (Body/Tail IN3)</text>
+                            <rect x="195" y="400" width="130" height="26" rx="4" fill="#002b20" stroke="#00ff88" class="pin-box" data-pin="24" />
+                            <text x="260" y="417" fill="#00ff88" font-size="10" font-weight="bold" text-anchor="middle">Pin 24: GPIO 8 (Body/Tail IN4)</text>
+
+                            <rect x="55" y="432" width="125" height="26" rx="4" fill="#290022" stroke="#ff00cc" class="pin-box" data-pin="35" />
+                            <text x="117" y="449" fill="#ff00cc" font-size="10" font-weight="bold" text-anchor="middle">Pin 35: GPIO 19 (Body/Tail ENB)</text>
+
+                            <rect x="55" y="605" width="270" height="40" rx="6" fill="#131c33" stroke="#2d3f6d" />
+                            <text x="190" y="622" fill="#8a99ad" font-size="10" font-weight="bold" text-anchor="middle">📹 CSI Camera Ribbon Connector</text>
+                            <text x="190" y="637" fill="#8a99ad" font-size="10" text-anchor="middle">Audio: 3.5mm Headphone Jack / USB Audio</text>
+                        </g>
+
+                        <!-- 3. PCA9685 16-CHANNEL PWM SERVO DRIVER -->
+                        <g id="modPca">
+                            <rect x="420" y="30" width="380" height="380" rx="12" fill="#0c1d2e" stroke="#00f0ff" stroke-width="2" />
+                            <rect x="420" y="30" width="380" height="34" rx="12" fill="#00f0ff" opacity="0.2" />
+                            <text x="610" y="53" fill="#00f0ff" font-weight="bold" font-size="14" text-anchor="middle">🎛️ PCA9685 16-CHANNEL 12-BIT PWM SERVO DRIVER (I2C: 0x40)</text>
+
+                            <rect x="440" y="75" width="340" height="35" rx="6" fill="#13243a" stroke="#00f0ff" />
+                            <text x="610" y="97" fill="#00f0ff" font-size="11" font-weight="bold" text-anchor="middle">VCC: 5V (Pi) | GND: Common | SDA: GPIO 2 | SCL: GPIO 3 | V+: Ext 5V/6V Power</text>
+
+                            <g font-size="10" font-weight="bold">
+                                <rect x="440" y="120" width="105" height="30" rx="4" fill="#291218" stroke="#ff3344" />
+                                <text x="492" y="139" fill="#ff6677" text-anchor="middle">Ch 0: Arm Base J1</text>
+
+                                <rect x="555" y="120" width="105" height="30" rx="4" fill="#291218" stroke="#ff3344" />
+                                <text x="607" y="139" fill="#ff6677" text-anchor="middle">Ch 1: Arm Shoulder J2</text>
+
+                                <rect x="670" y="120" width="110" height="30" rx="4" fill="#291218" stroke="#ff3344" />
+                                <text x="725" y="139" fill="#ff6677" text-anchor="middle">Ch 2: Arm Elbow J3</text>
+
+                                <rect x="440" y="160" width="105" height="30" rx="4" fill="#292000" stroke="#ffd700" />
+                                <text x="492" y="179" fill="#ffd700" text-anchor="middle">Ch 3: Dreidel Left Servo</text>
+
+                                <rect x="555" y="160" width="105" height="30" rx="4" fill="#292000" stroke="#ffd700" />
+                                <text x="607" y="179" fill="#ffd700" text-anchor="middle">Ch 4: Dreidel Right Servo</text>
+
+                                <rect x="670" y="160" width="110" height="30" rx="4" fill="#292000" stroke="#ffd700" />
+                                <text x="725" y="179" fill="#ffd700" text-anchor="middle">Ch 5: Arm Wrist/Claw J4/J5</text>
+
+                                <rect x="440" y="200" width="105" height="30" rx="4" fill="#002b3d" stroke="#00f0ff" />
+                                <text x="492" y="219" fill="#00f0ff" text-anchor="middle">Ch 6: Shamash Candle Bulb</text>
+
+                                <rect x="555" y="200" width="105" height="30" rx="4" fill="#002b3d" stroke="#00f0ff" />
+                                <text x="607" y="219" fill="#00f0ff" text-anchor="middle">Ch 7: Side Bulbs 1-4</text>
+
+                                <rect x="670" y="200" width="110" height="30" rx="4" fill="#002b3d" stroke="#00f0ff" />
+                                <text x="725" y="219" fill="#00f0ff" text-anchor="middle">Ch 8: Side Bulbs 5-8</text>
+
+                                <rect x="440" y="240" width="105" height="30" rx="4" fill="#292000" stroke="#ffd700" />
+                                <text x="492" y="259" fill="#ffd700" text-anchor="middle">Ch 9: Fish Spot Pan</text>
+
+                                <rect x="555" y="240" width="105" height="30" rx="4" fill="#292000" stroke="#ffd700" />
+                                <text x="607" y="259" fill="#ffd700" text-anchor="middle">Ch 10: Fish Spot Tilt</text>
+
+                                <rect x="670" y="240" width="110" height="30" rx="4" fill="#292000" stroke="#ffd700" />
+                                <text x="725" y="259" fill="#ffd700" text-anchor="middle">Ch 11: 4 Light Domes</text>
+                            </g>
+                        </g>
+
+                        <!-- 4. L298N CONTROLLER -->
+                        <g id="modL298">
+                            <rect x="420" y="430" width="380" height="210" rx="12" fill="#1f0f18" stroke="#ff00cc" stroke-width="2" />
+                            <rect x="420" y="430" width="380" height="32" rx="12" fill="#ff00cc" opacity="0.2" />
+                            <text x="610" y="452" fill="#ff00cc" font-weight="bold" font-size="14" text-anchor="middle">⚙️ L298N DUAL H-BRIDGE MOTOR DRIVER</text>
+
+                            <g font-size="10" font-weight="bold">
+                                <rect x="440" y="475" width="105" height="28" rx="4" fill="#290022" stroke="#ff00cc" />
+                                <text x="492" y="493" fill="#ff00cc" text-anchor="middle">ENA: GPIO 18 (Pin 12)</text>
+
+                                <rect x="555" y="475" width="105" height="28" rx="4" fill="#131c33" stroke="#3399ff" />
+                                <text x="607" y="493" fill="#3399ff" text-anchor="middle">IN1: GPIO 23 (Pin 16)</text>
+
+                                <rect x="670" y="475" width="110" height="28" rx="4" fill="#131c33" stroke="#3399ff" />
+                                <text x="725" y="493" fill="#3399ff" text-anchor="middle">IN2: GPIO 24 (Pin 18)</text>
+
+                                <rect x="440" y="515" width="105" height="28" rx="4" fill="#290022" stroke="#ff00cc" />
+                                <text x="492" y="533" fill="#ff00cc" text-anchor="middle">ENB: GPIO 19 (Pin 35)</text>
+
+                                <rect x="555" y="515" width="105" height="28" rx="4" fill="#002b20" stroke="#00ff88" />
+                                <text x="607" y="533" fill="#00ff88" text-anchor="middle">IN3: GPIO 25 (Pin 22)</text>
+
+                                <rect x="670" y="515" width="110" height="28" rx="4" fill="#002b20" stroke="#00ff88" />
+                                <text x="725" y="533" fill="#00ff88" text-anchor="middle">IN4: GPIO 8 (Pin 24)</text>
+
+                                <rect x="440" y="555" width="160" height="35" rx="5" fill="#2b141a" stroke="#ff3344" />
+                                <text x="520" y="572" fill="#ff6677" text-anchor="middle">OUT1 / OUT2 (Channel A):</text>
+                                <text x="520" y="584" fill="#ffffff" font-size="9" text-anchor="middle">Fish Mouth DC Motor (Lipsync)</text>
+
+                                <rect x="620" y="555" width="160" height="35" rx="5" fill="#2b0020" stroke="#ff00cc" />
+                                <text x="700" y="572" fill="#ff66cc" text-anchor="middle">OUT3 / OUT4 (Channel B):</text>
+                                <text x="700" y="584" fill="#ffffff" font-size="9" text-anchor="middle">Fwd 3s Body Swing / Rev Tail Wag</text>
+                            </g>
+                        </g>
+
+                        <!-- 5. STAGE HARDWARE OUTPUTS -->
+                        <g id="modStage">
+                            <rect x="840" y="30" width="470" height="610" rx="12" fill="#121729" stroke="#00ff88" stroke-width="2" />
+                            <rect x="840" y="30" width="470" height="34" rx="12" fill="#00ff88" opacity="0.2" />
+                            <text x="1075" y="293" fill="#00ff88" font-weight="bold" font-size="14" text-anchor="middle">🎭 MENORAH FISH & ROBOT ARM STAGE ENDPOINTS</text>
+
+                            <rect x="860" y="320" width="210" height="120" rx="8" fill="#291218" stroke="#ff3344" />
+                            <text x="965" y="342" fill="#ff6677" font-weight="bold" font-size="12" text-anchor="middle">🐟 GEMMY SINGING TROUT</text>
+                            <text x="965" y="362" fill="#dddddd" font-size="10" text-anchor="middle">• Mouth DC Motor: L298 Ch A</text>
+                            <text x="965" y="380" fill="#dddddd" font-size="10" text-anchor="middle">• Body 3s PWM Ramp: L298 Ch B Fwd</text>
+                            <text x="965" y="398" fill="#dddddd" font-size="10" text-anchor="middle">• Tail Wag Motor: L298 Ch B Rev</text>
+                            <text x="965" y="416" fill="#dddddd" font-size="10" text-anchor="middle">• Head Spotlight: PCA Ch 9, 10</text>
+
+                            <rect x="1090" y="320" width="200" height="120" rx="8" fill="#002b3d" stroke="#00f0ff" />
+                            <text x="1190" y="342" fill="#00f0ff" font-weight="bold" font-size="12" text-anchor="middle">🦾 5-DOF ROBOT ARM</text>
+                            <text x="1190" y="362" fill="#dddddd" font-size="10" text-anchor="middle">• Arm Servos: PCA Ch 0 - 5</text>
+                            <text x="1190" y="380" fill="#dddddd" font-size="10" text-anchor="middle">• Claw Flickering Candle: ALWAYS ON</text>
+                            <text x="1190" y="398" fill="#dddddd" font-size="10" text-anchor="middle">• Menorah Candle Lighting Arc</text>
+
+                            <rect x="860" y="455" width="430" height="130" rx="8" fill="#211d00" stroke="#ffd700" />
+                            <text x="1075" y="477" fill="#ffd700" font-weight="bold" font-size="12" text-anchor="middle">🕎 180° MENORAH ARC & 4 LIGHT DOMES</text>
+                            <text x="1075" y="497" fill="#dddddd" font-size="10" text-anchor="middle">• 9 Menorah Candle Light Bulbs (PCA Ch 6, 7, 8)</text>
+                            <text x="1075" y="515" fill="#dddddd" font-size="10" text-anchor="middle">• 4 Stage Light Domes Breathing Sequence (PCA Ch 11)</text>
+                            <text x="1075" y="533" fill="#dddddd" font-size="10" text-anchor="middle">• Spinning Dreidels on Servos (PCA Ch 3, 4)</text>
+                        </g>
+
+                        <!-- WIRE PATHS -->
+                        <g id="wireGroup" stroke-width="2.5" fill="none" opacity="0.85">
+                            <path class="wire wire-power" data-category="power" d="M 260 240 L 260 170 L 245 170 L 245 115" stroke="#ff3344" stroke-dasharray="4,2" />
+                            <path class="wire wire-power" data-category="power" d="M 260 304 L 260 180 L 180 180 L 180 150" stroke="#aaaaaa" />
+
+                            <path class="wire wire-i2c" data-category="i2c" d="M 180 272 L 390 272 L 390 92 L 440 92" stroke="#00f0ff" stroke-width="3" />
+                            <path class="wire wire-i2c" data-category="i2c" d="M 180 304 L 380 304 L 380 84 L 440 84" stroke="#3399ff" stroke-width="3" />
+
+                            <path class="wire wire-l298" data-category="l298" d="M 180 336 L 400 336 L 400 489 L 440 489" stroke="#ff00cc" stroke-width="2.5" />
+                            <path class="wire wire-l298" data-category="l298" d="M 325 368 L 390 368 L 390 489 L 555 489" stroke="#3399ff" stroke-width="2.5" />
+                            <path class="wire wire-l298" data-category="l298" d="M 325 385 L 380 385 L 380 489 L 670 489" stroke="#3399ff" stroke-width="2.5" />
+
+                            <path class="wire wire-servos" data-category="servos" d="M 800 135 L 830 135 L 830 380 L 860 380" stroke="#ff3344" stroke-width="3" />
+                            <path class="wire wire-servos" data-category="servos" d="M 800 215 L 820 215 L 820 380 L 1090 380" stroke="#00f0ff" stroke-width="3" />
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="panel-card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <h3>📋 COMPLETE INTERACTIVE GPIO & PCA9685 PINOUT TABLE</h3>
+                    <span class="card-badge" id="tableRowCount">Showing 18 Connected Lines</span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="pinout-table" id="pinoutTable">
+                        <thead>
+                            <tr>
+                                <th>Header / Module</th>
+                                <th>Pin / Ch #</th>
+                                <th>Signal / GPIO Name</th>
+                                <th>Wire Color</th>
+                                <th>Connected Hardware Module</th>
+                                <th>Terminal / Channel</th>
+                                <th>Function Description</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pinoutTableBody">
+                            <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 3: Servo Calibration & Output Tests Pane -->
+        <div id="tabCalib" class="tab-pane" style="display: none;">
+            <div class="sync-switch-card" style="border-color: var(--accent-yellow); background: linear-gradient(135deg, #1f1b0f, #13120b); margin-bottom: 20px;">
+                <div class="card-header" style="border:none;">
+                    <h3>🚀 ALL-OUTPUTS MASTER HARDWARE DIAGNOSTICS & SELF-TEST</h3>
+                    <button class="btn-export" id="btnRunFullHardwareTest" style="background: linear-gradient(135deg, var(--accent-yellow), #ff9900); color: #000; font-size: 0.9rem; padding: 10px 20px;">⚡ RUN FULL HARDWARE SELF-TEST SEQUENCER</button>
+                </div>
+                <div class="ai-response-box" id="diagConsoleLog" style="font-family: monospace; font-size: 0.85rem; color: #00ff88; min-height: 75px; max-height: 140px; overflow-y: auto;">
+                    <em>System Ready. Click "RUN FULL HARDWARE SELF-TEST SEQUENCER" to test all servos, L298 motor drivers, neck 3s swing, tail wag, and candle light bulbs in order...</em>
+                </div>
+            </div>
+
+            <div class="config-grid">
+                <!-- Servo Offset Calibration (Expanded Vertical Panels) -->
+                <div class="panel-card config-card" style="grid-column: span 2; min-height: 520px; padding: 22px;">
+                    <div class="card-header">
+                        <h3>📐 SERVO ZERO OFFSETS & CALIBRATION TRIMS (ALL 14 SERVOS IN PROJECT)</h3>
+                        <span class="card-badge">PCA9685 PWM Channels 0 - 15</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 10px;">
+                        <!-- 5-DOF Robot Arm Servos -->
+                        <div class="small-bird-box" style="background: rgba(255, 68, 68, 0.05); border: 1px solid rgba(255, 68, 68, 0.25); padding: 14px;">
+                            <h4 style="color:#ff5555; text-align:left; font-size:0.95rem; margin-bottom: 10px;">🦾 5-DOF Robot Arm Servos (PCA Ch 0 - 2, 5):</h4>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Base Yaw (J1 Ch 0):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ1Offset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibArmJ1Offset">
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ1Offset', 1)">+</button>
+                                <span id="calibArmJ1OffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Shoulder (J2 Ch 1):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ2Offset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibArmJ2Offset">
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ2Offset', 1)">+</button>
+                                <span id="calibArmJ2OffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Elbow (J3 Ch 2):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ3Offset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibArmJ3Offset">
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ3Offset', 1)">+</button>
+                                <span id="calibArmJ3OffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Wrist (J4 Ch 5):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ4Offset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibArmJ4Offset">
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ4Offset', 1)">+</button>
+                                <span id="calibArmJ4OffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Gripper Claw (J5):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ5Offset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibArmJ5Offset">
+                                <button class="btn-step" onclick="adjustOffset('calibArmJ5Offset', 1)">+</button>
+                                <span id="calibArmJ5OffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                        </div>
+
+                        <!-- Fish Stage Servos & Spinning Dreidels -->
+                        <div class="small-bird-box" style="background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.25); padding: 14px;">
+                            <h4 style="color:#00d4ff; text-align:left; font-size:0.95rem; margin-bottom: 10px;">🐟 Stage Servos & Dreidels (PCA Ch 3, 4):</h4>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Mouth-Side Servo (Ch 3):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibMouthServoOffset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibMouthServoOffset">
+                                <button class="btn-step" onclick="adjustOffset('calibMouthServoOffset', 1)">+</button>
+                                <span id="calibMouthServoOffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Tail-Side Servo (Ch 4):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibTailServoOffset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibTailServoOffset">
+                                <button class="btn-step" onclick="adjustOffset('calibTailServoOffset', 1)">+</button>
+                                <span id="calibTailServoOffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                        </div>
+
+                        <!-- 3 Tall Spotlights Servos -->
+                        <div class="small-bird-box" style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.25); padding: 14px;">
+                            <h4 style="color:#ffd700; text-align:left; font-size:0.95rem; margin-bottom: 10px;">💡 3 Tall Spotlights Servos (PCA Ch 9, 10, 12, 13, 14):</h4>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Fish Plaque Spot Pan (Ch 9):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibFishSpotPanOffset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibFishSpotPanOffset">
+                                <button class="btn-step" onclick="adjustOffset('calibFishSpotPanOffset', 1)">+</button>
+                                <span id="calibFishSpotPanOffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Fish Plaque Spot Tilt (Ch 10):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibFishSpotTiltOffset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibFishSpotTiltOffset">
+                                <button class="btn-step" onclick="adjustOffset('calibFishSpotTiltOffset', 1)">+</button>
+                                <span id="calibFishSpotTiltOffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Left Dreidel Spot Pan (Ch 12):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibLeftSpotPanOffset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibLeftSpotPanOffset">
+                                <button class="btn-step" onclick="adjustOffset('calibLeftSpotPanOffset', 1)">+</button>
+                                <span id="calibLeftSpotPanOffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                            <div class="slider-row">
+                                <span style="font-size:0.8rem; font-weight:bold;">Right Dreidel Spot Pan (Ch 13):</span>
+                                <button class="btn-step" onclick="adjustOffset('calibRightSpotPanOffset', -1)">-</button>
+                                <input type="range" min="-30" max="30" value="0" id="calibRightSpotPanOffset">
+                                <button class="btn-step" onclick="adjustOffset('calibRightSpotPanOffset', 1)">+</button>
+                                <span id="calibRightSpotPanOffsetVal" style="width:42px; text-align:right; font-weight:bold;">0°</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="btn-group" style="margin-top: 20px; flex-wrap: wrap; gap: 10px;">
+                        <button class="btn-toggle" id="btnCalibCenterAll">🎯 Center All Servos (90°)</button>
+                        <button class="btn-toggle" id="btnCalibSweepAll">🔄 Sweep All Servos Test</button>
+                        <button class="btn-toggle" id="btnResetCalibOffsets">🔄 Reset Offsets to 0°</button>
+                        <button class="btn-export" id="btnSaveCalibOffsets" style="background: linear-gradient(135deg, var(--accent-green), #00cc66); color: #000; padding: 10px 22px;">💾 Save All Offsets</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: System Configuration Pane -->
+        <div id="tabConfig" class="tab-pane" style="display: none;">
+            <div class="config-grid">
+                <div class="panel-card config-card">
+                    <div class="card-header">
+                        <h3>📹 CAMERA SELECTION & VIDEO SETTINGS</h3>
+                        <span class="card-badge">Video Hardware</span>
+                    </div>
+                    <div class="control-group">
+                        <label for="configCamSource">Choose Video Input Device / Camera:</label>
+                        <select id="configCamSource" class="config-select">
+                            <option value="usb">USB Webcam (/dev/video0)</option>
+                            <option value="csi">Raspberry Pi CSI Camera (Picamera2)</option>
+                            <option value="1">Secondary USB Camera (/dev/video1)</option>
+                            <option value="virtual">Virtual Stage Feed</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-card config-card">
+                    <div class="card-header">
+                        <h3>🗣️ AI VOICE & ACCENT SELECTION</h3>
+                        <span class="card-badge">Voice Synthesis</span>
+                    </div>
+                    <div class="control-group">
+                        <label for="configVoiceSelect">Fish AI Voice Preset:</label>
+                        <select id="configVoiceSelect" class="config-select">
+                            <option value="ai_male_us" selected>👨 Male US English (Deep Fish Voice)</option>
+                            <option value="ai_female_us">👩 Female US English (Standard Voice)</option>
+                            <option value="ai_male_uk">🇬🇧 Male UK English (Gentleman Accent)</option>
+                            <option value="ai_male_au">🇦🇺 Male Australian English</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: right; margin-top: 15px;">
+                <button class="btn-export" id="btnSaveConfig" style="padding: 12px 28px; font-size: 1rem; background: linear-gradient(135deg, var(--accent-green), #00cc66); color: #000;">💾 Save & Apply All Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="/menorahfish3d.js"></script>
+    <script src="/app.js"></script>
+</body>
+</html>
