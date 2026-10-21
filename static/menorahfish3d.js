@@ -329,9 +329,9 @@ class MenorahFish3D {
         this.dreidelLeftServoGroup.add(lServoMesh);
 
         // Dreidel on Top of Left Servo
-        const mouthDreidel = this.buildDreidel(0x00f0ff); // Glowing Cyan Dreidel
-        mouthDreidel.position.y = 35;
-        this.dreidelLeftServoGroup.add(mouthDreidel);
+        this.leftDreidelGroup = this.buildDreidel(0x00f0ff); // Glowing Cyan Dreidel
+        this.leftDreidelGroup.position.y = 35;
+        this.dreidelLeftServoGroup.add(this.leftDreidelGroup);
 
         // Dreidel Right Servo Motor & Spinning Dreidel (PCA Ch 4)
         this.dreidelRightServoGroup = new THREE.Group();
@@ -342,13 +342,13 @@ class MenorahFish3D {
         this.dreidelRightServoGroup.add(rServoMesh);
 
         // Dreidel on Top of Right Servo
-        const tailDreidel = this.buildDreidel(0xff00cc); // Glowing Magenta Dreidel
-        tailDreidel.position.y = 35;
-        this.dreidelRightServoGroup.add(tailDreidel);
+        this.rightDreidelGroup = this.buildDreidel(0xff00cc); // Glowing Magenta Dreidel
+        this.rightDreidelGroup.position.y = 35;
+        this.dreidelRightServoGroup.add(this.rightDreidelGroup);
     }
 
     build3TallPoleSpotlights() {
-        // 1. Center Fish Plaque Pole Spotlight (Base anchored behind middle of fish plaque X=0, Z=-215)
+        // 1. Center Fish Mouth Pole Spotlight (Tall pole illuminating the fish mouth at X=0, Z=-215)
         const centerPoleGroup = new THREE.Group();
         centerPoleGroup.position.set(0, 0, -215);
         this.stageRoot.add(centerPoleGroup);
@@ -372,10 +372,10 @@ class MenorahFish3D {
 
         this.centerFishSpotlight = new THREE.SpotLight(0xfff5ea, 6.0, 500, Math.PI / 3, 0.2);
         this.centerFishSpotlight.position.set(0, 195, -170);
-        if (this.fishHeadGroup) this.centerFishSpotlight.target = this.fishHeadGroup;
+        if (this.fishMouthMesh) this.centerFishSpotlight.target = this.fishMouthMesh;
         this.stageRoot.add(this.centerFishSpotlight);
 
-        // 2. Left Dreidel Servo Pole Spotlight (Shining on Mouth-Side Servo & Dreidel at X=-85, Z=-80)
+        // 2. Left Dreidel Servo Pole Spotlight (Tall pole illuminating Left Dreidel at X=-85, Z=-80)
         const leftPoleGroup = new THREE.Group();
         leftPoleGroup.position.set(-125, 0, -110);
         this.stageRoot.add(leftPoleGroup);
@@ -400,10 +400,10 @@ class MenorahFish3D {
 
         this.leftDreidelSpotlight = new THREE.SpotLight(0x00f0ff, 4.0, 300, Math.PI / 4, 0.25);
         this.leftDreidelSpotlight.position.set(-100, 158, -85);
-        if (this.leftDreidelGroup) this.leftDreidelSpotlight.target = this.leftDreidelGroup;
+        if (this.dreidelLeftServoGroup) this.leftDreidelSpotlight.target = this.dreidelLeftServoGroup;
         this.stageRoot.add(this.leftDreidelSpotlight);
 
-        // 3. Right Dreidel Servo Pole Spotlight (Shining on Right Stage Dreidel Stand at X=+85, Z=-80)
+        // 3. Right Dreidel Servo Pole Spotlight (Tall pole illuminating Right Dreidel at X=+85, Z=-80)
         const rightPoleGroup = new THREE.Group();
         rightPoleGroup.position.set(125, 0, -110);
         this.stageRoot.add(rightPoleGroup);
@@ -428,7 +428,7 @@ class MenorahFish3D {
 
         this.rightDreidelSpotlight = new THREE.SpotLight(0xff00cc, 4.0, 300, Math.PI / 4, 0.25);
         this.rightDreidelSpotlight.position.set(100, 158, -85);
-        if (this.rightDreidelGroup) this.rightDreidelSpotlight.target = this.rightDreidelGroup;
+        if (this.dreidelRightServoGroup) this.rightDreidelSpotlight.target = this.dreidelRightServoGroup;
         this.stageRoot.add(this.rightDreidelSpotlight);
     }
 
@@ -451,12 +451,21 @@ class MenorahFish3D {
         bodyMesh.position.y = 9;
         dreidelGroup.add(bodyMesh);
 
+        // Gold Trim Bezel on Body Edges
+        const frameMesh = new THREE.Mesh(
+            new THREE.BoxGeometry(19, 1, 19),
+            new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 })
+        );
+        frameMesh.position.y = 18;
+        dreidelGroup.add(frameMesh);
+
         // 3. Inverted Pyramid Bottom Tip
         const tipMesh = new THREE.Mesh(
             new THREE.ConeGeometry(12.7, 16, 4),
             new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8, roughness: 0.2 })
         );
         tipMesh.rotation.x = Math.PI; // Inverted pyramid tip
+        tipMesh.rotation.y = Math.PI / 4; // Align flat with body
         tipMesh.position.y = -8;
         dreidelGroup.add(tipMesh);
 
@@ -621,6 +630,7 @@ class MenorahFish3D {
         if (!this.webglSupported || !newState) return;
 
         if (newState.is_speaking !== undefined) this.state.is_speaking = newState.is_speaking;
+        if (newState.is_dancing !== undefined) this.state.is_dancing = newState.is_dancing;
         if (newState.fish) Object.assign(this.state.fish, newState.fish);
         if (newState.robot_arm) Object.assign(this.state.robot_arm, newState.robot_arm);
         if (newState.menorah) Object.assign(this.state.menorah, newState.menorah);
@@ -642,13 +652,19 @@ class MenorahFish3D {
 
         // 2. Animate Animatronic Fish Mechanics
         const fish = this.state.fish;
-        const isSpeaking = !!this.state.is_speaking;
+        const isSpeaking = !!this.state.is_speaking || !!fish.mouth_motor;
+        const isDancing = !!this.state.is_dancing;
 
-        // Neck Swing (0.0=Angled rest position against plaque with head, body & tail fully visible, 1.0=3s gradual swing out facing camera)
+        // As the fish talks, its neck comes out slowly
         if (this.fishNeckGroup) {
-            const restAngle = Math.PI / 3.2; // Angled rest stance so head, body & tail are 100% visible against plaque
-            const targetRad = restAngle - (fish.neck_position * (Math.PI / 3.2)); // Swings outward facing camera directly
-            this.fishNeckGroup.rotation.y += (targetRad - this.fishNeckGroup.rotation.y) * 0.1;
+            const restAngle = Math.PI / 3.2; // Angled rest stance against plaque
+            if (isSpeaking) {
+                if (fish.neck_position < 1.0) fish.neck_position = Math.min(1.0, fish.neck_position + 0.02);
+            } else if (!isDancing) {
+                if (fish.neck_position > 0.0) fish.neck_position = Math.max(0.0, fish.neck_position - 0.02);
+            }
+            const targetRad = restAngle - (fish.neck_position * (Math.PI / 3.2)); // Swings outward facing camera
+            this.fishNeckGroup.rotation.y += (targetRad - this.fishNeckGroup.rotation.y) * 0.08;
         }
 
         // Mouth Beak Lipsync Motion
@@ -657,31 +673,26 @@ class MenorahFish3D {
             this.fishMouthMesh.scale.set(1.0, mouthScale, 1.0);
         }
 
-        // Tail Wagging
+        // As the fish talks, its tail wags
         if (this.fishTailGroup) {
-            const tailSwing = (fish.tail_motor || isSpeaking) ? Math.sin(time * 12) * 0.45 : Math.sin(time * 2) * 0.08;
+            const tailSwing = (fish.tail_motor || isSpeaking || isDancing) ? Math.sin(time * 12) * 0.45 : Math.sin(time * 2) * 0.08;
             this.fishTailGroup.rotation.y = tailSwing;
         }
 
-        // Head & 3 Tall Pole Spotlights
-        if (this.fishSpotlight) {
-            this.fishSpotlight.intensity = (fish.head_spotlight || isSpeaking) ? 4.5 : 0.8;
-        }
-        if (this.centerFishSpotlight) {
-            this.centerFishSpotlight.intensity = (fish.head_spotlight || isSpeaking) ? 6.0 : 1.2;
-        }
-        if (this.leftDreidelSpotlight) {
-            this.leftDreidelSpotlight.intensity = isSpeaking ? (4.0 + Math.sin(time * 8) * 1.5) : 1.5;
-        }
-        if (this.rightDreidelSpotlight) {
-            this.rightDreidelSpotlight.intensity = isSpeaking ? (4.0 + Math.cos(time * 8) * 1.5) : 1.5;
-        }
+        // 3 Tall Pole Spotlights:
+        // 1 illuminating left dreidel, 1 illuminating right dreidel, 1 illuminating fish's mouth!
+        // These lights illuminate when the fish talks!
+        const spotIntensity = isSpeaking ? 8.0 : 1.0;
+        if (this.fishSpotlight) this.fishSpotlight.intensity = isSpeaking ? 6.0 : 0.8;
+        if (this.centerFishSpotlight) this.centerFishSpotlight.intensity = spotIntensity;
+        if (this.leftDreidelSpotlight) this.leftDreidelSpotlight.intensity = spotIntensity;
+        if (this.rightDreidelSpotlight) this.rightDreidelSpotlight.intensity = spotIntensity;
 
-        // Dreidel Left & Right Servos (PCA Ch 3 & Ch 4) Sweep Back & Forth when Fish Talks or Dances!
+        // When the fish starts speaking, the 2 dreidel servos sweep back and forth!
         if (this.dreidelLeftServoGroup && this.dreidelRightServoGroup) {
-            if (isSpeaking) {
-                const sweepAngleLeft = Math.sin(time * 3.5) * (Math.PI / 3); // Sweeps back and forth
-                const sweepAngleRight = Math.cos(time * 3.5) * (Math.PI / 3);
+            if (isSpeaking || isDancing) {
+                const sweepAngleLeft = Math.sin(time * 4.0) * (Math.PI / 3);
+                const sweepAngleRight = Math.cos(time * 4.0) * (Math.PI / 3);
                 this.dreidelLeftServoGroup.rotation.y = sweepAngleLeft;
                 this.dreidelRightServoGroup.rotation.y = sweepAngleRight;
             } else {
@@ -690,9 +701,9 @@ class MenorahFish3D {
             }
         }
 
-        // Spin Dreidels on Fixed Stage Stands during Speech or Singing
+        // Dreidels spin on top of servos
         if (this.leftDreidelGroup && this.rightDreidelGroup) {
-            if (isSpeaking) {
+            if (isSpeaking || isDancing) {
                 this.leftDreidelGroup.rotation.y += 0.15;
                 this.rightDreidelGroup.rotation.y += 0.15;
             } else {
@@ -725,19 +736,36 @@ class MenorahFish3D {
             });
         }
 
-        // 5. Animate 4 Light Domes (Slow breathing pulse while fish speaks)
+        // 5. Animate 4 Light Domes on the Round Stage:
+        // - Breathe in unison when the fish talks
+        // - Do light chases when the fish dances to the music!
         if (this.lightDomes) {
-            const dState = this.state.light_domes;
-            this.lightDomes.forEach(d => {
-                let intensityVal = 100;
-                if (d.name.includes("mouth1")) intensityVal = dState.mouth_side_dome1;
-                else if (d.name.includes("mouth2")) intensityVal = dState.mouth_side_dome2;
-                else if (d.name.includes("tail1")) intensityVal = dState.tail_side_dome1;
-                else if (d.name.includes("tail2")) intensityVal = dState.tail_side_dome2;
+            if (isDancing) {
+                // Sequential running chase pattern around the 4 stage domes when dancing to music
+                const chaseIndex = Math.floor((time * 6.0) % 4);
+                this.lightDomes.forEach((d, idx) => {
+                    const isLit = (idx === chaseIndex);
+                    d.domeMat.opacity = isLit ? 0.95 : 0.2;
+                    d.domeLight.intensity = isLit ? 3.5 : 0.3;
+                });
+            } else if (isSpeaking) {
+                // Breathe in unison when the fish talks (smooth sync pulse for all 4 domes together)
+                const unisonPulse = 0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * 3.5));
+                this.lightDomes.forEach(d => {
+                    d.domeMat.opacity = unisonPulse * 0.9;
+                    d.domeLight.intensity = unisonPulse * 3.0;
+                });
+            } else {
+                // Idle ambient glow
+                this.lightDomes.forEach(d => {
+                    d.domeMat.opacity = 0.3;
+                    d.domeLight.intensity = 0.5;
+                });
+            }
+        }
 
-                const opacity = (intensityVal / 100.0) * 0.85;
-                d.domeMat.opacity = opacity;
-                d.domeLight.intensity = (intensityVal / 100.0) * 2.0;
+        this.renderer.render(this.scene, this.camera);
+    }
             });
         }
 

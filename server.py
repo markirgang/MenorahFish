@@ -158,6 +158,7 @@ gemini_bridge = GeminiArmBridge()
 # --- MENORAH FISH & ROBOT ARM GLOBAL HARDWARE STATE ---
 menorah_fish_state = {
     "is_speaking": False,
+    "is_dancing": False,
     "active_voice": "ai_male_us",
 
     # Animatronic Fish Motors & Stage Accessories:
@@ -538,7 +539,8 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
             beat_pulse = bool(data.get("beat_pulse", False))
 
             with state_lock:
-                menorah_fish_state["is_speaking"] = is_singing
+                menorah_fish_state["is_speaking"] = False
+                menorah_fish_state["is_dancing"] = is_singing
                 menorah_fish_state["fish"]["mouth_motor"] = mouth_open
                 if beat_pulse:
                     menorah_fish_state["fish"]["tail_motor"] = True
