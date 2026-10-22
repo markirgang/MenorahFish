@@ -1189,7 +1189,7 @@ body {
             <div class="panel-card" style="margin-top: 20px;">
                 <div class="card-header">
                     <h3>📋 COMPLETE INTERACTIVE GPIO & PCA9685 PINOUT TABLE</h3>
-                    <span class="card-badge" id="tableRowCount">Showing 18 Connected Lines</span>
+                    <span class="card-badge" id="tableRowCount">Showing Connected Lines</span>
                 </div>
 
                 <div style="overflow-x: auto;">
@@ -1207,6 +1207,135 @@ body {
                         </thead>
                         <tbody id="pinoutTableBody">
                             <!-- Populated dynamically via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- DEDICATED PARTS LIST & BILL OF MATERIALS (BOM) CARD -->
+            <div class="panel-card" style="margin-top: 20px; border-color: var(--accent-yellow);">
+                <div class="card-header">
+                    <h3 style="color: var(--accent-yellow);">📦 SYSTEM PARTS LIST & BILL OF MATERIALS (BOM)</h3>
+                    <span class="card-badge" style="background: rgba(255, 215, 0, 0.15); color: var(--accent-yellow);">Hardware Specifications Page</span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="pinout-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">Item</th>
+                                <th>Component / Part Name</th>
+                                <th>Specification / Model</th>
+                                <th style="width: 50px;">Qty</th>
+                                <th>Subsystem Role & Interface</th>
+                                <th>Power / Voltage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1</strong></td>
+                                <td><strong style="color: var(--accent-cyan);">Raspberry Pi 4 / 5</strong></td>
+                                <td>4GB / 8GB RAM Model B</td>
+                                <td><strong>1</strong></td>
+                                <td>Master Application & Server Controller, I2C Bus, GPIO Triggers</td>
+                                <td>5V @ 3A DC</td>
+                            </tr>
+                            <tr>
+                                <td><strong>2</strong></td>
+                                <td><strong style="color: var(--accent-green);">Gemmy Animatronic Trout Fish</strong></td>
+                                <td>Original OEM Big Mouth Billy Bass / Trout</td>
+                                <td><strong>1</strong></td>
+                                <td>OEM Mouth Motor (Ch 1) & OEM Neck/Tail Motors (Ch 2) on Wooden Plaque</td>
+                                <td>5V - 6V DC</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3</strong></td>
+                                <td><strong style="color: var(--accent-yellow);">5-DOF Robot Arm Kit</strong></td>
+                                <td>Aluminum Alloy Arm with Claw & Candle Holder</td>
+                                <td><strong>1</strong></td>
+                                <td>5-DOF Candle Lighting Robot Arm holding 120VAC Claw Candle</td>
+                                <td>5V - 6V DC</td>
+                            </tr>
+                            <tr>
+                                <td><strong>4</strong></td>
+                                <td><strong style="color: var(--accent-purple);">PCA9685 PWM Servo Driver</strong></td>
+                                <td>16-Channel 12-Bit I2C Board (0x40)</td>
+                                <td><strong>1</strong></td>
+                                <td>Drives 6 Servos (Robot Arm J1-J5, Stage Servos & Dreidels)</td>
+                                <td>5V Logic / 5V-6V V+</td>
+                            </tr>
+                            <tr>
+                                <td><strong>5</strong></td>
+                                <td><strong style="color: var(--accent-magenta);">L298N Dual H-Bridge Driver</strong></td>
+                                <td>Dual Channel DC Motor Controller</td>
+                                <td><strong>1</strong></td>
+                                <td>Ch 1: OEM Mouth Motor Fwd | Ch 2: OEM Neck Motor Fwd / Tail Motor Rev</td>
+                                <td>5V - 6V DC</td>
+                            </tr>
+                            <tr>
+                                <td><strong>6</strong></td>
+                                <td><strong style="color: var(--accent-red);">Solid State Relays (SSRs)</strong></td>
+                                <td>3.3V DC Trigger / 120VAC Output SSRs</td>
+                                <td><strong>10</strong></td>
+                                <td>Controls 10 120VAC Candle Bulbs (8 Side + 1 Shamash + 1 Claw Candle)</td>
+                                <td>3.3V DC / 120VAC</td>
+                            </tr>
+                            <tr>
+                                <td><strong>7</strong></td>
+                                <td><strong style="color: var(--accent-cyan);">MOSFET Power Switch Modules</strong></td>
+                                <td>IRF520 / D4184 MOSFET Boards</td>
+                                <td><strong>4</strong></td>
+                                <td>PWM Dimmer for 4 Stage Light Domes & 3 Tall Pole Spotlights</td>
+                                <td>3.3V PWM / 12V DC</td>
+                            </tr>
+                            <tr>
+                                <td><strong>8</strong></td>
+                                <td><strong style="color: var(--accent-yellow);">High-Torque Metal Servos</strong></td>
+                                <td>MG996R / SG90 Digital Servos</td>
+                                <td><strong>6</strong></td>
+                                <td>Robot Arm Joint Servos & Stage Servo Drives for Spinning Dreidels</td>
+                                <td>5V - 6V DC</td>
+                            </tr>
+                            <tr>
+                                <td><strong>9</strong></td>
+                                <td><strong style="color: var(--accent-green);">120VAC Menorah Candle Bulbs</strong></td>
+                                <td>E12 / C7 Electric Candle Bulbs & Sockets</td>
+                                <td><strong>10</strong></td>
+                                <td>8 Menorah Side Candles + 1 Center Shamash Candle + 1 Claw Candle</td>
+                                <td>120VAC Line Voltage</td>
+                            </tr>
+                            <tr>
+                                <td><strong>10</strong></td>
+                                <td><strong style="color: var(--accent-cyan);">Stage Light Domes</strong></td>
+                                <td>Frosted Glass RGB/Cyan Light Domes</td>
+                                <td><strong>4</strong></td>
+                                <td>2 Mouth-Side & 2 Tail-Side Dimmable Domes (Breathing/Chases)</td>
+                                <td>12V DC / MOSFET</td>
+                            </tr>
+                            <tr>
+                                <td><strong>11</strong></td>
+                                <td><strong style="color: var(--accent-yellow);">Tall Pole Spotlights</strong></td>
+                                <td>Adjustable Pole Spotlight Lamp Assemblies</td>
+                                <td><strong>3</strong></td>
+                                <td>Center Fish Mouth Spotlight + Left & Right Dreidel Spotlights</td>
+                                <td>12V DC / MOSFET</td>
+                            </tr>
+                            <tr>
+                                <td><strong>12</strong></td>
+                                <td><strong style="color: var(--accent-magenta);">Main DC Power Supply</strong></td>
+                                <td>5V/6V 12A Switching DC Power Supply</td>
+                                <td><strong>1</strong></td>
+                                <td>High-Current Power Rail for Servos, L298N DC Motors & Stage Lights</td>
+                                <td>5V-6V 12A Out</td>
+                            </tr>
+                            <tr>
+                                <td><strong>13</strong></td>
+                                <td><strong style="color: var(--text-muted);">Common Ground Bus & Wiring</strong></td>
+                                <td>20 AWG / 18 AWG Wire Harness & Bus Bar</td>
+                                <td><strong>1</strong></td>
+                                <td>Common Reference Ground Rail connecting Pi, L298N, PCA9685 & SSRs</td>
+                                <td>Common GND</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

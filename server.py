@@ -581,27 +581,35 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({
                 "device": "Animatronic Menorah Fish & Robot Arm Controller",
                 "i2c_bus": {"sda": "GPIO 2 (Pin 3)", "scl": "GPIO 3 (Pin 5)", "pca9685_address": "0x40"},
+                "120vac_ssr_candles": {
+                    "claw_candle": "GPIO 4 (Pin 7) -> 3.3V DC SSR for 120VAC Claw Candle (Always ON)",
+                    "shamash_candle": "GPIO 17 (Pin 11) -> 3.3V DC SSR for 120VAC Center Shamash Candle",
+                    "side_candle_1": "GPIO 27 (Pin 13) -> 3.3V DC SSR for 120VAC Menorah Side Candle 1",
+                    "side_candle_2": "GPIO 22 (Pin 15) -> 3.3V DC SSR for 120VAC Menorah Side Candle 2",
+                    "side_candle_3": "GPIO 10 (Pin 19) -> 3.3V DC SSR for 120VAC Menorah Side Candle 3",
+                    "side_candle_4": "GPIO 9 (Pin 21) -> 3.3V DC SSR for 120VAC Menorah Side Candle 4",
+                    "side_candle_5": "GPIO 11 (Pin 23) -> 3.3V DC SSR for 120VAC Menorah Side Candle 5",
+                    "side_candle_6": "GPIO 5 (Pin 29) -> 3.3V DC SSR for 120VAC Menorah Side Candle 6",
+                    "side_candle_7": "GPIO 6 (Pin 31) -> 3.3V DC SSR for 120VAC Menorah Side Candle 7",
+                    "side_candle_8": "GPIO 13 (Pin 33) -> 3.3V DC SSR for 120VAC Menorah Side Candle 8"
+                },
+                "mosfet_pwm_lights": {
+                    "stage_light_domes": "GPIO 12 (Pin 32) -> MOSFET Gate (Breathing Pulse & Dancing Chase PWM)",
+                    "fish_mouth_spotlight": "GPIO 16 (Pin 36) -> MOSFET Gate (Fish Mouth Spotlight PWM)",
+                    "left_dreidel_spotlight": "GPIO 20 (Pin 38) -> MOSFET Gate (Left Dreidel Spotlight PWM)",
+                    "right_dreidel_spotlight": "GPIO 21 (Pin 40) -> MOSFET Gate (Right Dreidel Spotlight PWM)"
+                },
                 "pca9685_channels": {
-                    "0": "Robot Arm Joint 1 Base Servo (Yaw -90 to +90)",
-                    "1": "Robot Arm Joint 2 Shoulder Servo (Pitch)",
-                    "2": "Robot Arm Joint 3 Elbow Servo (Pitch)",
-                    "3": "Dreidel Left Servo (PCA Ch 3)",
-                    "4": "Dreidel Right Servo (PCA Ch 4)",
-                    "5": "Robot Arm Joint 4 Wrist / Gripper Servo",
-                    "6": "Center Shamash Candle Light Bulb PWM Dimmer",
-                    "7": "Side Candles 1-4 Light Bulbs PWM Dimmer",
-                    "8": "Side Candles 5-8 Light Bulbs PWM Dimmer",
-                    "9": "Fish Head Spotlight Servo Pan",
-                    "10": "Fish Head Spotlight Servo Tilt",
-                    "11": "Stage Light Domes PWM Dimmer",
-                    "12": "Auxiliary Output 1",
-                    "13": "Auxiliary Output 2",
-                    "14": "Auxiliary Output 3",
-                    "15": "Stationary Fixed Base (No Servo)"
+                    "0": "Robot Arm Joint 1 Base Yaw Servo (-90° to +90°)",
+                    "1": "Robot Arm Joint 2 Shoulder Pitch Servo (-90° to +90°)",
+                    "2": "Robot Arm Joint 3 Elbow Pitch Servo (-135° to +135°)",
+                    "3": "Stage Servo 1 (Mouth-Side Servo & Spinning Dreidel)",
+                    "4": "Stage Servo 2 (Tail-Side Servo & Spinning Dreidel)",
+                    "5": "Robot Arm Joint 4/5 Wrist Pitch & Gripper Claw Servo"
                 },
                 "l298_driver": {
-                    "chA_mouth": "GPIO 18 ENA, GPIO 23 IN1, GPIO 24 IN2 (Forward Polarity Lipsync)",
-                    "chB_body_tail": "GPIO 19 ENB, GPIO 25 IN3, GPIO 8 IN4 (Fwd Polarity 3s Body PWM Ramp / Rev Polarity Tail Wag)"
+                    "ch1_mouth": "GPIO 18 ENA, GPIO 23 IN1, GPIO 24 IN2 (Forward Polarity OEM Mouth Motor)",
+                    "ch2_neck_tail": "GPIO 19 ENB, GPIO 25 IN3, GPIO 8 IN4 (Fwd Polarity OEM Neck Motor / Rev Polarity OEM Tail Motor)"
                 }
             })
 
@@ -841,7 +849,7 @@ if __name__ == "__main__":
     def generate_schematic_pdf(self):
         import io
         from reportlab.lib.pagesizes import letter, landscape
-        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, PageBreak
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib import colors
 
@@ -857,16 +865,18 @@ if __name__ == "__main__":
 
         story = [
             Paragraph("🦜 MENORAH FISH & CANDLE ROBOT ARM STAGE - MASTER WIRING SCHEMATIC", title_style),
-            Paragraph("Complete Pinout Map for Raspberry Pi 4/5, PCA9685 PWM Driver, Dual L298N Motor Controllers & Menorah Stage", subtitle_style),
+            Paragraph("Page 1 of 2: Complete Pinout Map for Raspberry Pi 4/5, PCA9685 PWM Driver, L298N Motor Controllers, SSRs & Stage Lighting", subtitle_style),
             HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#0055a5'), spaceBefore=2, spaceAfter=8),
             Paragraph("⚡ Core System Hardware Overview", heading_style)
         ]
 
         overview_data = [
             [Paragraph("Module / Component", header_cell_style), Paragraph("Hardware Role & Signals", header_cell_style), Paragraph("Power Requirements", header_cell_style)],
-            [Paragraph("<b>Raspberry Pi 4 / 5</b>", cell_style), Paragraph("Executes master server, Gemini AI, I2C bus (Pin 3 SDA, Pin 5 SCL), L298N drivers & Relays", cell_style), Paragraph("+5V @ 3A DC", cell_style)],
-            [Paragraph("<b>PCA9685 16-Ch PWM Driver</b>", cell_style), Paragraph("I2C Address 0x40. Drives 16 PWM channels (5-DOF Robot Arm, Stage Servos, Spotlights, Domes)", cell_style), Paragraph("+5V Logic / +5V-+6V 12A V+", cell_style)],
-            [Paragraph("<b>Single L298N Motor Driver</b>", cell_style), Paragraph("Ch A: Fish Mouth DC Motor (Forward Polarity Lipsync). Ch B: Fish Body 3s PWM Ramp Swing Out (Fwd) & Tail Reverse Polarity Wag", cell_style), Paragraph("+5V/+6V High-Current Rail", cell_style)]
+            [Paragraph("<b>Raspberry Pi 4 / 5</b>", cell_style), Paragraph("Executes master server, Gemini AI, I2C bus (Pin 3 SDA, Pin 5 SCL), SSR Triggers, MOSFET PWM & L298N drivers", cell_style), Paragraph("+5V @ 3A DC", cell_style)],
+            [Paragraph("<b>PCA9685 16-Ch PWM Driver</b>", cell_style), Paragraph("I2C Address 0x40. Drives 16 PWM channels (5-DOF Robot Arm, Stage Servos & Spinning Dreidels)", cell_style), Paragraph("+5V Logic / +5V-+6V 12A V+", cell_style)],
+            [Paragraph("<b>Single L298N Motor Driver</b>", cell_style), Paragraph("Ch 1: OEM Mouth DC Motor (Forward Polarity). Ch 2: OEM Neck Motor (Fwd Polarity) & OEM Tail Motor (Rev Polarity)", cell_style), Paragraph("+5V/+6V High-Current Rail", cell_style)],
+            [Paragraph("<b>120VAC Solid State Relays (10x)</b>", cell_style), Paragraph("10x 3.3V DC Triggered SSRs for 8 Menorah Side Candles, 1 Shamash Candle, and 1 Claw Candle", cell_style), Paragraph("3.3V DC Logic / 120VAC Line", cell_style)],
+            [Paragraph("<b>MOSFET Power Transistors (4x)</b>", cell_style), Paragraph("4x MOSFET Gate Switches for Dimmable 4 Stage Domes (Breathing/Chases) & 3 Pole Spotlights", cell_style), Paragraph("3.3V DC PWM / 12V Stage Power", cell_style)]
         ]
         t_overview = Table(overview_data, colWidths=[150, 430, 140])
         t_overview.setStyle(TableStyle([
@@ -875,6 +885,118 @@ if __name__ == "__main__":
             ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#ffffff'), colors.HexColor('#f5f8ff')])
         ]))
         story.append(t_overview)
+        story.append(Spacer(1, 8))
+
+        # Complete Pinout Map Table
+        story.append(Paragraph("📋 Complete GPIO & PCA9685 Pinout Connection Lookup Table", heading_style))
+        pinout_rows = [[
+            Paragraph("Header / Module", header_cell_style),
+            Paragraph("Pin / Ch #", header_cell_style),
+            Paragraph("Signal Name", header_cell_style),
+            Paragraph("Connected Hardware Module", header_cell_style),
+            Paragraph("Terminal", header_cell_style),
+            Paragraph("Function Description", header_cell_style)
+        ]]
+
+        pinout_items = [
+            ("Raspberry Pi", "Pin 3", "GPIO 2 (SDA1)", "PCA9685 PWM Driver", "SDA Terminal", "I2C Serial Data Bus for 16-Channel Servo Controller"),
+            ("Raspberry Pi", "Pin 5", "GPIO 3 (SCL1)", "PCA9685 PWM Driver", "SCL Terminal", "I2C Serial Clock Line for 16-Channel Servo Controller"),
+            ("Raspberry Pi", "Pin 7", "GPIO 4", "Claw Candle 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Claw Candle (Always ON)"),
+            ("Raspberry Pi", "Pin 11", "GPIO 17", "Shamash Candle 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Center Shamash Candle"),
+            ("Raspberry Pi", "Pin 13", "GPIO 27", "Side Candle 1 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Side Candle 1"),
+            ("Raspberry Pi", "Pin 15", "GPIO 22", "Side Candle 2 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Side Candle 2"),
+            ("Raspberry Pi", "Pin 19", "GPIO 10", "Side Candle 3 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Side Candle 3"),
+            ("Raspberry Pi", "Pin 21", "GPIO 9", "Side Candle 4 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Side Candle 4"),
+            ("Raspberry Pi", "Pin 23", "GPIO 11", "Side Candle 5 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Side Candle 5"),
+            ("Raspberry Pi", "Pin 29", "GPIO 5", "Side Candle 6 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Side Candle 6"),
+            ("Raspberry Pi", "Pin 31", "GPIO 6", "Side Candle 7 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Side Candle 7"),
+            ("Raspberry Pi", "Pin 33", "GPIO 13", "Side Candle 8 120VAC SSR", "DC Input Terminal", "3.3V DC Solid State Relay for 120VAC Side Candle 8"),
+            ("Raspberry Pi", "Pin 32", "GPIO 12 (PWM)", "4 Stage Light Domes MOSFET", "Gate Terminal", "MOSFET Power Switch / PWM Dimmer for 4 Stage Light Domes"),
+            ("Raspberry Pi", "Pin 36", "GPIO 16 (PWM)", "Fish Mouth Spotlight MOSFET", "Gate Terminal", "MOSFET Power Switch / PWM Dimmer for Fish Spotlight"),
+            ("Raspberry Pi", "Pin 38", "GPIO 20 (PWM)", "Left Dreidel Spotlight MOSFET", "Gate Terminal", "MOSFET Power Switch / PWM Dimmer for Left Dreidel Spotlight"),
+            ("Raspberry Pi", "Pin 40", "GPIO 21 (PWM)", "Right Dreidel Spotlight MOSFET", "Gate Terminal", "MOSFET Power Switch / PWM Dimmer for Right Dreidel Spotlight"),
+            ("Raspberry Pi", "Pin 12", "GPIO 18 (PWM)", "L298N Motor Driver", "ENA Terminal", "Channel 1: OEM Mouth DC Motor Speed PWM"),
+            ("Raspberry Pi", "Pin 16", "GPIO 23", "L298N Motor Driver", "IN1 Terminal", "Channel 1: OEM Mouth Direction 1 (Forward Polarity)"),
+            ("Raspberry Pi", "Pin 18", "GPIO 24", "L298N Motor Driver", "IN2 Terminal", "Channel 1: OEM Mouth Direction 2 (Forward Polarity)"),
+            ("Raspberry Pi", "Pin 35", "GPIO 19 (PWM)", "L298N Motor Driver", "ENB Terminal", "Channel 2: OEM Neck & Tail DC Motors Speed PWM"),
+            ("Raspberry Pi", "Pin 22", "GPIO 25", "L298N Motor Driver", "IN3 Terminal", "Channel 2: OEM Neck Forward Swing / Tail Reverse Wag"),
+            ("Raspberry Pi", "Pin 24", "GPIO 8", "L298N Motor Driver", "IN4 Terminal", "Channel 2: OEM Neck Forward Swing / Tail Reverse Wag"),
+            ("PCA9685 PWM", "Ch 0 - 2", "PWM Servo Out", "Robot Arm Joints 1-3", "Servos", "Base Yaw (-90° to +90°), Shoulder Pitch, Elbow Pitch"),
+            ("PCA9685 PWM", "Ch 3 - 4", "PWM Servo Out", "Mouth & Tail Side Servos", "Servos", "Stage Servos & Spinning Dreidels"),
+            ("PCA9685 PWM", "Ch 5", "PWM Servo Out", "Robot Arm Joint 4/5 Claw", "Servo", "Wrist Pitch & Gripper Candle Claw")
+        ]
+
+        for item in pinout_items:
+            pinout_rows.append([
+                Paragraph(f"<b>{item[0]}</b>", cell_style),
+                Paragraph(f"<b>{item[1]}</b>", cell_style),
+                Paragraph(f"<code>{item[2]}</code>", cell_style),
+                Paragraph(item[3], cell_style),
+                Paragraph(item[4], cell_style),
+                Paragraph(item[5], cell_style)
+            ])
+
+        t_pinout = Table(pinout_rows, colWidths=[90, 65, 95, 125, 85, 260])
+        t_pinout.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0055a5')),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#dddddd')),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#ffffff'), colors.HexColor('#f8fafd')])
+        ]))
+        story.append(t_pinout)
+
+        # --- PAGE 2: COMPLETE BILL OF MATERIALS & PARTS LIST ---
+        story.append(PageBreak())
+        story.append(Paragraph("📦 MENORAH FISH & ROBOT ARM STAGE - BILL OF MATERIALS (PARTS LIST)", title_style))
+        story.append(Paragraph("Page 2 of 2: Complete Parts Specification, Quantities, Power Requirements & Subsystem Roles", subtitle_style))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#0055a5'), spaceBefore=2, spaceAfter=8))
+
+        bom_rows = [[
+            Paragraph("Item #", header_cell_style),
+            Paragraph("Component / Part Name", header_cell_style),
+            Paragraph("Specification / Model", header_cell_style),
+            Paragraph("Qty", header_cell_style),
+            Paragraph("Subsystem Role & Interface", header_cell_style),
+            Paragraph("Power / Voltage", header_cell_style)
+        ]]
+
+        bom_data_items = [
+            ("1", "Raspberry Pi 4 or 5", "4GB / 8GB RAM Model B", "1", "Master Application & Server Controller, I2C Bus, GPIO Triggers", "5V @ 3A DC (Type-C)"),
+            ("2", "Gemmy Animatronic Trout Fish", "Original OEM Big Mouth Billy Bass / Trout", "1", "OEM Mouth Motor (Ch 1) & OEM Neck/Tail Motors (Ch 2) on Wooden Plaque", "5V - 6V DC High Current"),
+            ("3", "5-DOF Robot Arm Kit", "Aluminum Alloy Arm with Claw & Candle Holder", "1", "5-DOF Candle Lighting Robot Arm holding 120VAC Claw Candle", "5V - 6V DC (PCA9685 V+)"),
+            ("4", "PCA9685 PWM Servo Driver", "16-Channel 12-Bit I2C Board (0x40)", "1", "Drives 6 Servos (Robot Arm J1-J5, Stage Servos & Dreidels)", "5V Logic / 5V-6V V+"),
+            ("5", "L298N Dual H-Bridge Motor Driver", "Dual Channel DC Motor Controller", "1", "Ch 1: OEM Mouth Motor Fwd | Ch 2: OEM Neck Motor Fwd / Tail Motor Rev", "5V - 6V DC Motor Power"),
+            ("6", "Solid State Relays (SSRs)", "3.3V DC Trigger / 120VAC Output SSRs", "10", "Controls 10 120VAC Candle Bulbs (8 Side + 1 Shamash + 1 Claw Candle)", "3.3V DC Trigger / 120VAC Line"),
+            ("7", "MOSFET Power Switch Modules", "IRF520 / D4184 MOSFET Boards", "4", "PWM Dimmer for 4 Stage Light Domes & 3 Tall Pole Spotlights", "3.3V DC PWM / 12V DC Stage"),
+            ("8", "High-Torque Metal Servos", "MG996R / SG90 Digital Servos", "6", "Robot Arm Joint Servos & Stage Servo Drives for Spinning Dreidels", "5V - 6V DC"),
+            ("9", "120VAC Menorah Candle Bulbs", "E12 / C7 Electric Candle Bulbs & Sockets", "10", "8 Menorah Side Candles + 1 Center Shamash Candle + 1 Claw Candle", "120VAC Line Voltage"),
+            ("10", "Stage Light Domes", "Frosted Glass RGB/Cyan Light Domes", "4", "2 Mouth-Side & 2 Tail-Side Dimmable Domes (Breathing/Chases)", "12V DC / MOSFET Gate"),
+            ("11", "Tall Pole Spotlights", "Adjustable Pole Spotlight Lamp Assemblies", "3", "Center Fish Mouth Spotlight + Left & Right Dreidel Spotlights", "12V DC / MOSFET Gate"),
+            ("12", "Main Power Supply", "5V/6V 12A Switching DC Power Supply", "1", "High-Current Power Rail for Servos, L298N DC Motors & Stage Lights", "110V-240VAC Input / 5V-6V 12A Out"),
+            ("13", "Common Ground Bus & Wiring", "20 AWG / 18 AWG Wire Harness & Bus Bar", "1", "Common Reference Ground Rail connecting Pi, L298N, PCA9685 & SSRs", "Common GND Reference")
+        ]
+
+        for item in bom_data_items:
+            bom_rows.append([
+                Paragraph(f"<b>{item[0]}</b>", cell_style),
+                Paragraph(f"<b>{item[1]}</b>", cell_style),
+                Paragraph(item[2], cell_style),
+                Paragraph(f"<b>{item[3]}</b>", cell_style),
+                Paragraph(item[4], cell_style),
+                Paragraph(item[5], cell_style)
+            ])
+
+        t_bom = Table(bom_rows, colWidths=[40, 130, 130, 35, 255, 130])
+        t_bom.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0055a5')),
+            ('ALIGN', (0,0), (-1,-1), 'LEFT'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#dddddd')),
+            ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#ffffff'), colors.HexColor('#f8fafd')])
+        ]))
+        story.append(t_bom)
+
         doc.build(story)
         return buffer.getvalue()
 
