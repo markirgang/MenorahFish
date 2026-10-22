@@ -14,8 +14,8 @@ class GeminiArmBridge:
             "On stage, a 5-DOF Robot Arm holding a constantly lit flickering candle in its claw lights candles arranged in a 180-degree circular Menorah arc (8 side candles plus 1 center Shamash candle). "
             "Your job is to:\n"
             "1. Produce warm, cheerful, conversational responses (1-3 concise sentences).\n"
-            "2. Whenever the user asks to light a specific number of candles for Hanukkah or Menorah lighting (1 to 8 candles), or extinguish candles, call the `light_menorah_candles` function tool with the requested `count` (1 to 8, or 0 to extinguish all).\n"
-            "3. If asked to move the robot arm joints, call `arm_move` or `arm_pose`.\n"
+            "2. Whenever asked to light candles for Hanukkah (1 to 8 candles), call the `light_menorah_candles` tool with requested `count`.\n"
+            "3. Whenever asked to return arm to rest position / park arm, give a high five, say yes (nod arm), or say no (shake arm), call `arm_gesture` with `gesture_name` ('rest', 'high_five', 'yes', 'no').\n"
             "Keep spoken responses concise, joyful, and tailored to Hanukkah, Menorah lighting, or robotics performance!"
         )
 
@@ -121,20 +121,17 @@ class GeminiArmBridge:
                     )
                 ),
                 types.FunctionDeclaration(
-                    name="arm_pose",
-                    description="Triggers a preset robot arm routine or stance.",
+                    name="arm_gesture",
+                    description="Triggers a robot arm gesture or movement routine (rest, high_five, yes, no).",
                     parameters=types.Schema(
                         type=types.Type.OBJECT,
                         properties={
-                            "pose_name": types.Schema(
+                            "gesture_name": types.Schema(
                                 type=types.Type.STRING,
-                                enum=[
-                                    "Home / Standby", "Light All 8 Candles", "Extinguish All Candles",
-                                    "Wave Arm", "Celebrate Hanukkah Dance", "Reach High"
-                                ]
+                                enum=["rest", "high_five", "yes", "no"]
                             )
                         },
-                        required=["pose_name"]
+                        required=["gesture_name"]
                     )
                 )
             ])
@@ -227,20 +224,17 @@ class GeminiArmBridge:
                     )
                 ),
                 types.FunctionDeclaration(
-                    name="arm_pose",
-                    description="Triggers a preset robot arm routine or stance.",
+                    name="arm_gesture",
+                    description="Triggers a robot arm gesture or movement routine (rest, high_five, yes, no).",
                     parameters=types.Schema(
                         type=types.Type.OBJECT,
                         properties={
-                            "pose_name": types.Schema(
+                            "gesture_name": types.Schema(
                                 type=types.Type.STRING,
-                                enum=[
-                                    "Home / Standby", "Light All 8 Candles", "Extinguish All Candles",
-                                    "Wave Arm", "Celebrate Hanukkah Dance", "Reach High"
-                                ]
+                                enum=["rest", "high_five", "yes", "no"]
                             )
                         },
-                        required=["pose_name"]
+                        required=["gesture_name"]
                     )
                 )
             ])

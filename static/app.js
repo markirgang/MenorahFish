@@ -141,6 +141,14 @@ function startApp() {
     setupRange('armJ4', 'armJ4Val', 'j4_wrist');
     setupRange('armJ5', 'armJ5Val', 'j5_gripper');
 
+    // Robot Arm Gesture Action Buttons (Rest, High Five, Yes, No)
+    document.querySelectorAll('.btn-arm-gesture').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.getAttribute('data-action');
+            sendPost('/api/arm/action', { action: action });
+        });
+    });
+
     // Turntable Base Slider & Toggle
     setupRange('baseAngle', 'baseAngleVal', 'servo_angle');
     const btnBaseRandom = document.getElementById('btnBaseRandom');

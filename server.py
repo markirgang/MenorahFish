@@ -283,66 +283,149 @@ def update_menorah_fish_background_loop():
 
 threading.Thread(target=update_menorah_fish_background_loop, daemon=True).start()
 
-# Sequence to Extinguish All Candles & Light N Menorah Candles using Robot Arm
+# --- 5-DOF ROBOT ARM KINEMATIC ROUTINES & GESTURES ---
+
+def execute_arm_rest_position():
+    """Returns the 5-DOF Robot Arm to standard rest / park standby position."""
+    with state_lock:
+        menorah_fish_state["robot_arm"]["j1_base"] = 0
+        menorah_fish_state["robot_arm"]["j2_shoulder"] = 30
+        menorah_fish_state["robot_arm"]["j3_elbow"] = 45
+        menorah_fish_state["robot_arm"]["j4_wrist"] = 0
+        menorah_fish_state["robot_arm"]["j5_gripper"] = 50
+
+def execute_arm_high_five():
+    """Performs a High-Five gesture with the 5-DOF Robot Arm."""
+    # Step A: Center base and raise arm high
+    with state_lock:
+        menorah_fish_state["robot_arm"]["j1_base"] = 0
+        menorah_fish_state["robot_arm"]["j2_shoulder"] = 75
+        menorah_fish_state["robot_arm"]["j3_elbow"] = 20
+        menorah_fish_state["robot_arm"]["j4_wrist"] = 40
+
+    time.sleep(0.6)
+
+    # Step B: Push forward into High Five contact!
+    with state_lock:
+        menorah_fish_state["robot_arm"]["j2_shoulder"] = 85
+        menorah_fish_state["robot_arm"]["j4_wrist"] = 55
+
+    time.sleep(1.2)
+
+    # Step C: Return to Rest Stance
+    execute_arm_rest_position()
+
+def execute_arm_nod_yes():
+    """Performs a smooth 'Nod Yes' gesture by tilting shoulder, elbow, and wrist joints up and down twice."""
+    with state_lock:
+        menorah_fish_state["robot_arm"]["j1_base"] = 0
+
+    for _ in range(2):
+        # Nod Down
+        with state_lock:
+            menorah_fish_state["robot_arm"]["j2_shoulder"] = 55
+            menorah_fish_state["robot_arm"]["j3_elbow"] = -20
+            menorah_fish_state["robot_arm"]["j4_wrist"] = -30
+        time.sleep(0.35)
+
+        # Nod Up
+        with state_lock:
+            menorah_fish_state["robot_arm"]["j2_shoulder"] = 20
+            menorah_fish_state["robot_arm"]["j3_elbow"] = 60
+            menorah_fish_state["robot_arm"]["j4_wrist"] = 20
+        time.sleep(0.35)
+
+    execute_arm_rest_position()
+
+def execute_arm_shake_no():
+    """Performs a smooth 'Shake No' gesture by sweeping base/shoulder yaw left and right twice."""
+    with state_lock:
+        menorah_fish_state["robot_arm"]["j2_shoulder"] = 40
+        menorah_fish_state["robot_arm"]["j3_elbow"] = 30
+        menorah_fish_state["robot_arm"]["j4_wrist"] = 0
+
+    for _ in range(2):
+        # Shake Left
+        with state_lock:
+            menorah_fish_state["robot_arm"]["j1_base"] = -35
+        time.sleep(0.35)
+
+        # Shake Right
+        with state_lock:
+            menorah_fish_state["robot_arm"]["j1_base"] = 35
+        time.sleep(0.35)
+
+    execute_arm_rest_position()
+
+def trigger_arm_action(action_name, args=None):
+    action_name = str(action_name).lower().strip()
+    if any(k in action_name for k in ["rest", "home", "park", "standby"]):
+        threading.Thread(target=execute_arm_rest_position, daemon=True).start()
+    elif "five" in action_name or "high_five" in action_name:
+        threading.Thread(target=execute_arm_high_five, daemon=True).start()
+    elif any(k in action_name for k in ["yes", "nod"]):
+        threading.Thread(target=execute_arm_nod_yes, daemon=True).start()
+    elif any(k in action_name for k in ["no", "shake"]):
+        threading.Thread(target=execute_arm_shake_no, daemon=True).start()
+    elif any(k in action_name for k in ["candle", "light"]):
+        count = 8
+        if args and isinstance(args, dict) and "count" in args:
+            count = int(args["count"])
+        threading.Thread(target=execute_light_menorah_candles_sequence, args=(count,), daemon=True).start()
 def execute_light_menorah_candles_sequence(count):
     count = max(0, min(8, int(count)))
     with state_lock:
         menorah_fish_state["menorah"]["lit_count"] = count
-        # Step 1: Extinguish all candle light bulbs
+        # Extinguish all candle light bulbs initially
         menorah_fish_state["menorah"]["candles"] = [False] * 9
 
     time.sleep(0.5)
 
     if count == 0:
+        execute_arm_rest_position()
         return
 
     # Always light Center Shamash Candle (Index 4) first
     with state_lock:
         menorah_fish_state["menorah"]["candles"][4] = True
 
-    # 180° Arc Candle Positions for Robot Arm (Index 0 to 8)
     arc_angles = [-80, -60, -40, -20, 0, 20, 40, 60, 80]
-
-    # Map requested count N to candle indices (Alternating or left-to-right side candles)
-    # Side candle indices: [0, 1, 2, 3] (left) and [5, 6, 7, 8] (right)
-    target_indices = []
     side_order = [3, 5, 2, 6, 1, 7, 0, 8] # Light inner to outer candles
-    for i in range(min(count, 8)):
-        target_indices.append(side_order[i])
+    target_indices = [side_order[i] for i in range(min(count, 8))]
 
     for idx in target_indices:
         target_angle = arc_angles[idx]
-        
-        # Step A: Move Robot Arm Over Candle
+
+        # Step 1: Rotate shoulder/base J1 to align arm with target candle
         with state_lock:
             menorah_fish_state["robot_arm"]["j1_base"] = target_angle
-            menorah_fish_state["robot_arm"]["j2_shoulder"] = 45
-            menorah_fish_state["robot_arm"]["j3_elbow"] = -30
-            menorah_fish_state["robot_arm"]["j4_wrist"] = -15
-
-        time.sleep(0.8)
-
-        # Step B: Lower Claw Candle onto Candle Top & Light Bulb!
-        with state_lock:
-            menorah_fish_state["robot_arm"]["j2_shoulder"] = 60
-            menorah_fish_state["robot_arm"]["j3_elbow"] = -45
-            menorah_fish_state["menorah"]["candles"][idx] = True # Candle STAYS LIT!
+            menorah_fish_state["robot_arm"]["j2_shoulder"] = 35
+            menorah_fish_state["robot_arm"]["j3_elbow"] = 25
+            menorah_fish_state["robot_arm"]["j4_wrist"] = 0
 
         time.sleep(0.6)
 
-        # Step C: Lift Arm Back Up
+        # Step 2: Coordinate Shoulder (J2), Elbow (J3), and Wrist (J4) TOGETHER
+        # to lower the claw candle flame tip directly onto the top bulb of the menorah candle!
         with state_lock:
+            menorah_fish_state["robot_arm"]["j2_shoulder"] = 55
+            menorah_fish_state["robot_arm"]["j3_elbow"] = -35
+            menorah_fish_state["robot_arm"]["j4_wrist"] = -25
+            # Light the candle bulb!
+            menorah_fish_state["menorah"]["candles"][idx] = True
+
+        time.sleep(0.8) # Hold flame touching candle top to make it look like it lights it!
+
+        # Step 3: Return Wrist (J4), Elbow (J3), and Shoulder (J2) back to rest stance TOGETHER
+        with state_lock:
+            menorah_fish_state["robot_arm"]["j4_wrist"] = 0
+            menorah_fish_state["robot_arm"]["j3_elbow"] = 45
             menorah_fish_state["robot_arm"]["j2_shoulder"] = 30
-            menorah_fish_state["robot_arm"]["j3_elbow"] = 20
 
-        time.sleep(0.4)
+        time.sleep(0.5)
 
-    # Step D: Return Robot Arm to Standby Home Stance
-    with state_lock:
-        menorah_fish_state["robot_arm"]["j1_base"] = 0
-        menorah_fish_state["robot_arm"]["j2_shoulder"] = 30
-        menorah_fish_state["robot_arm"]["j3_elbow"] = 45
-        menorah_fish_state["robot_arm"]["j4_wrist"] = 0
+    # Step 4: Park arm at rest stance after lighting last candle
+    execute_arm_rest_position()
 
 class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -536,6 +619,11 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
             threading.Thread(target=execute_light_menorah_candles_sequence, args=(count,), daemon=True).start()
             self.send_json({"success": True, "message": f"Lighting {count} Hanukkah candles with robot arm!"})
 
+        elif self.path == "/api/arm/action":
+            act = data.get("action") or data.get("gesture") or "rest"
+            trigger_arm_action(act, data)
+            self.send_json({"success": True, "action": act})
+
         elif self.path == "/api/playlist/upload":
             filename = data.get("filename", "custom_song.mp3")
             file_b64 = data.get("file_b64", "")
@@ -595,9 +683,13 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             if result.get("action"):
                 act = result["action"]
-                if act.get("name") == "light_menorah_candles":
+                act_name = act.get("name", "")
+                if act_name == "light_menorah_candles":
                     cnt = act.get("args", {}).get("count", 0)
                     threading.Thread(target=execute_light_menorah_candles_sequence, args=(cnt,), daemon=True).start()
+                elif act_name in ["arm_pose", "arm_gesture", "arm_move", "arm_action"]:
+                    pose = act.get("args", {}).get("pose_name") or act.get("args", {}).get("gesture_name") or act_name
+                    trigger_arm_action(pose, act.get("args"))
 
             self.send_json(result)
 
@@ -615,9 +707,13 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
 
             if result.get("action"):
                 act = result["action"]
-                if act.get("name") == "light_menorah_candles":
+                act_name = act.get("name", "")
+                if act_name == "light_menorah_candles":
                     cnt = act.get("args", {}).get("count", 0)
                     threading.Thread(target=execute_light_menorah_candles_sequence, args=(cnt,), daemon=True).start()
+                elif act_name in ["arm_pose", "arm_gesture", "arm_move", "arm_action"]:
+                    pose = act.get("args", {}).get("pose_name") or act.get("args", {}).get("gesture_name") or act_name
+                    trigger_arm_action(pose, act.get("args"))
 
             self.send_json(result)
 
