@@ -83,16 +83,17 @@ This document details all physical hardware connections, Raspberry Pi GPIO pin m
 
 ## ⚙️ 3. SINGLE L298N DUAL H-BRIDGE MOTOR DRIVER
 
-- **Channel 1 / Channel A (Fish Mouth DC Motor for Lipsync):**
+- **Channel 1 / Channel A (Original OEM Mouth DC Motor for Lipsync):**
   - `ENA` (PWM) -> Raspberry Pi **GPIO 18** (Pin 12)
   - `IN1` -> **GPIO 23** (Pin 16) | `IN2` -> **GPIO 24** (Pin 18)
-  - *Forward Polarity (`IN1=HIGH, IN2=LOW`):* Opens & closes fish mouth in sync with speech/song!
+  - *Forward Polarity (`IN1=HIGH, IN2=LOW`):* Powers original OEM mouth motor to open lower jaw in sync with speech/song!
 
-- **Channel 2 / Channel B (Fish Neck Swing & Reverse Polarity Tail Wag):**
+- **Channel 2 / Channel B (Original OEM Neck & Tail DC Motors):**
   - `ENB` (PWM) -> Raspberry Pi **GPIO 19** (Pin 35)
   - `IN3` -> **GPIO 25** (Pin 22) | `IN4` -> **GPIO 8** (Pin 24)
-  - *Forward Polarity (`IN3=HIGH, IN4=LOW`):* Swings fish neck out horizontally facing the audience while talking. Once fully extended, motor power is DEPOWERED (`0% PWM`) to prevent continuous stall current & motor coil overheating!
-  - *Reverse Polarity (`IN3=LOW, IN4=HIGH`):* Drives fish tail motor for tail wagging!
+  - *Forward Polarity (`IN3=HIGH, IN4=LOW` with 100% PWM):* Powers original OEM neck motor forward to swing fish head/neck out horizontally facing the audience and holds it extended continuously while talking against the original OEM return spring.
+  - *Depower (`IN3=LOW, IN4=LOW`, 0% PWM):* Cuts power to neck motor when done talking, allowing the original OEM return spring to pull the fish head/neck back flat against the wall plaque.
+  - *Reverse Polarity (`IN3=LOW, IN4=HIGH` with 80% PWM):* Powers original OEM tail motor mechanism for tail wagging!
 
 ---
 

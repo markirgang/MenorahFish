@@ -224,23 +224,17 @@ def update_menorah_fish_background_loop():
             fish = menorah_fish_state["fish"]
             domes = menorah_fish_state["light_domes"]
 
-            # 1. Fish Neck Swing Logic (L298 Ch B Forward Polarity with Thermal Overheat Protection)
+            # 1. Fish Neck Swing Logic (L298 Ch B Forward Polarity driving original OEM Neck Motor)
             if is_speaking:
                 speak_stop_time = None
                 if speak_start_time is None:
                     speak_start_time = now
 
-                # Swing neck out to full extension (1.0) over 1.2 seconds
+                # Swing neck out to full extension (1.0) over 1.0s and HOLD powered while talking
                 elapsed_speak = now - speak_start_time
-                target_pos = min(1.0, elapsed_speak / 1.2)
+                target_pos = min(1.0, elapsed_speak / 1.0)
                 fish["neck_position"] = target_pos
-
-                # Thermal Protection: Once neck is fully extended, DEPOWER motor (0% PWM)
-                # to prevent continuous stall current & DC motor coil overheating while talking!
-                if target_pos >= 1.0:
-                    fish["neck_motor_pwm"] = 0
-                else:
-                    fish["neck_motor_pwm"] = int(target_pos * 100)
+                fish["neck_motor_pwm"] = 100  # Held active forward to hold neck extended against OEM spring while talking
 
                 # Head spotlight bright & tail motor wagging (L298 Ch B Reverse Polarity) during speech
                 fish["head_spotlight"] = True
@@ -264,15 +258,12 @@ def update_menorah_fish_background_loop():
                 if speak_stop_time is None:
                     speak_stop_time = now
 
-                # Retract neck back to rest stance (0.0) and depower motor
+                # When talking stops, depower motor (0% PWM) so OEM return spring retracts neck flat against plaque
                 elapsed_stop = now - speak_stop_time
-                if elapsed_stop < 0.5:
-                    target_pos = fish["neck_position"]
-                else:
-                    target_pos = max(0.0, 1.0 - ((elapsed_stop - 0.5) / 1.5))
+                target_pos = max(0.0, 1.0 - (elapsed_stop / 0.8))
 
                 fish["neck_position"] = target_pos
-                fish["neck_motor_pwm"] = 0  # Motor depowered to prevent thermal overheating
+                fish["neck_motor_pwm"] = 0  # Motor depowered; OEM return spring retracts neck
 
                 domes["breathing"] = False
                 domes["mouth_side_dome1"] = 100
@@ -676,14 +667,15 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
         return '''#!/usr/bin/env python3
 """
 Animatronic Menorah Fish & Candle Lighting Robot Arm Master Hardware Driver
-Single L298N Motor Driver Configurations:
-- Channel 1 / Channel A (Fish Mouth DC Motor for Lipsync):
+Single L298N Motor Driver Configurations (100% Original OEM Gemmy Fish Hardware & Motors):
+- Channel 1 / Channel A (Original OEM Mouth DC Motor):
     * ENA = GPIO 18 (PWM), IN1 = GPIO 23, IN2 = GPIO 24
-    * Forward Polarity (IN1=HIGH, IN2=LOW): Opens & closes fish mouth in sync with speech
-- Channel 2 / Channel B (Fish Neck Swing & Tail Wag Motors):
+    * Forward Polarity (IN1=HIGH, IN2=LOW): Opens mouth in sync with speech
+- Channel 2 / Channel B (Original OEM Neck & Tail DC Motors):
     * ENB = GPIO 19 (PWM), IN3 = GPIO 25, IN4 = GPIO 8
-    * Forward Polarity (IN3=HIGH, IN4=LOW): Swings Neck out (PWM 0% -> 100% over 1.2s, then DEPOWERED to 0% to prevent thermal overheating)
-    * Reverse Polarity (IN3=LOW, IN4=HIGH): Drives Tail motor for wagging
+    * Forward Polarity (IN3=HIGH, IN4=LOW): Powers OEM neck motor to extend neck out and hold it extended while talking.
+    * Depower (IN3=LOW, IN4=LOW): Depowers neck motor when done talking, allowing OEM return spring to pull neck flat against plaque.
+    * Reverse Polarity (IN3=LOW, IN4=HIGH): Powers original OEM tail motor for tail wagging.
 - PCA9685 16-Channel PWM Servo Controller (Robot Arm Joints 1-5, Stage Servos & Dreidels, Spotlights, Domes)
 """
 import time
@@ -708,22 +700,21 @@ pwm_body_tail = GPIO.PWM(L298_ENB, 1000)
 pwm_mouth.start(0)
 pwm_body_tail.start(0)
 
-def swing_fish_neck_outstretched(duration_sec=1.2):
-    """Channel 2 Forward Polarity: Swings neck out, then DEPOWERS motor (0% PWM) to prevent thermal overheating."""
+def swing_fish_neck_outstretched(hold_sec=3.0):
+    """Channel 2 Forward Polarity (IN3=HIGH, IN4=LOW): Powers OEM neck motor forward to extend neck out and holds it extended while talking."""
     GPIO.output(L298_IN3, GPIO.HIGH)
     GPIO.output(L298_IN4, GPIO.LOW)
-    steps = 15
-    for i in range(1, steps + 1):
-        duty = int((i / steps) * 100)
-        pwm_body_tail.ChangeDutyCycle(duty)
-        time.sleep(duration_sec / steps)
-    # DEPOWER MOTOR AFTER EXTENSION TO PREVENT OVERHEATING WHILE TALKING:
+    pwm_body_tail.ChangeDutyCycle(100)
+    time.sleep(hold_sec)
+
+def retract_fish_neck():
+    """Channel 2 Depower (IN3=LOW, IN4=LOW): Depowers OEM neck motor, allowing original OEM return spring to retract neck flat against plaque."""
     pwm_body_tail.ChangeDutyCycle(0)
     GPIO.output(L298_IN3, GPIO.LOW)
     GPIO.output(L298_IN4, GPIO.LOW)
 
 def wag_fish_tail_reverse_polarity(active=True):
-    """Channel 2 Reverse Polarity: Drives tail motor for tail wagging."""
+    """Channel 2 Reverse Polarity (IN3=LOW, IN4=HIGH): Drives original OEM tail motor for tail wagging."""
     if active:
         GPIO.output(L298_IN3, GPIO.LOW)
         GPIO.output(L298_IN4, GPIO.HIGH)
@@ -735,10 +726,12 @@ def wag_fish_tail_reverse_polarity(active=True):
 
 def main():
     print("Menorah Fish L298N Master Motor Driver Online.")
-    print("Testing Fish Neck Swing (Channel 2 Forward Polarity + Thermal Cutoff)...")
-    swing_fish_neck_outstretched(1.2)
+    print("Testing Fish Neck Swing (Channel 2 Forward Polarity - OEM Neck Motor)...")
+    swing_fish_neck_outstretched(3.0)
+    print("Retracting Neck (OEM Return Spring)...")
+    retract_fish_neck()
     time.sleep(1.0)
-    print("Testing Fish Tail Wag (Channel 2 Reverse Polarity)...")
+    print("Testing Fish Tail Wag (Channel 2 Reverse Polarity - OEM Tail Motor)...")
     wag_fish_tail_reverse_polarity(True)
     time.sleep(1.0)
     wag_fish_tail_reverse_polarity(False)
