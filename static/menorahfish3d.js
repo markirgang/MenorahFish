@@ -767,3 +767,5 @@ class MenorahFish3D {
         this.renderer.render(this.scene, this.camera);
     }
 }
+
+window.MenorahFish3D = MenorahFish3D;

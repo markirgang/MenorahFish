@@ -2,7 +2,7 @@
  * Animatronic Menorah Fish & Candle Lighting Robot Arm Master Web Application
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+function startApp() {
     // 1. Initialize 3D Visualizer (Safely wrapped)
     let visualizer = null;
     try {
@@ -721,4 +721,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startApp);
+} else {
+    startApp();
+}
