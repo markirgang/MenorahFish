@@ -507,7 +507,15 @@ function startApp() {
                         const pwm = data.fish.neck_motor_pwm || 0;
                         hudNeck.textContent = (data.fish.neck_position > 0.01) ? `SWINGING (${pwm}% PWM, ${neckPos} Pos)` : "0% PWM (0.0s Retracted)";
                     }
-                    if (hudTail) hudTail.textContent = (data.fish.tail_motor || data.is_speaking) ? "WAGGING (L298 #2 ChA)" : "OFF (Idle Burst Mode)";
+                    if (hudTail) {
+                        if (data.is_speaking) {
+                            hudTail.textContent = "MUTED DURING SPEECH (Ch2 Fwd Neck Priority)";
+                        } else if (data.fish.tail_motor || data.is_dancing) {
+                            hudTail.textContent = "WAGGING (L298 Ch2 Rev Polarity)";
+                        } else {
+                            hudTail.textContent = "OFF (Idle)";
+                        }
+                    }
                 }
 
                 if (data.robot_arm && hudArm) {

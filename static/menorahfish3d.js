@@ -738,9 +738,9 @@ class MenorahFish3D {
             this.fishLowerJawGroup.rotation.z += (openAngle - this.fishLowerJawGroup.rotation.z) * 0.3;
         }
 
-        // 3. Fast Tail Wagging (Caudal fin energetic sweep)
+        // 3. Fast Tail Wagging (Caudal fin energetic sweep - active ONLY when NOT speaking/singing!)
         if (this.fishTailGroup) {
-            const isWagging = fish.tail_motor || isSpeaking || isDancing;
+            const isWagging = !isSpeaking && (!!fish.tail_motor || isDancing);
             const tailSwing = isWagging ? Math.sin(time * 18) * 0.55 : Math.sin(time * 2) * 0.08;
             this.fishTailGroup.rotation.y = tailSwing;
         }
@@ -989,8 +989,9 @@ class MenorahFish3D {
         ctx.fillStyle = '#3cb371';
         ctx.fill();
 
-        // Tail Fin
-        const tailWag = (fish.tail_motor || isSpeaking || isDancing) ? Math.sin(time * 18) * 16 : 0;
+        // Tail Fin (Wags ONLY when NOT speaking/singing)
+        const isTailWagging = !isSpeaking && (!!fish.tail_motor || isDancing);
+        const tailWag = isTailWagging ? Math.sin(time * 18) * 16 : 0;
         ctx.beginPath();
         ctx.moveTo(cx + 52 + fishOffsetX, fishY + fishOffsetY);
         ctx.lineTo(cx + 90 + fishOffsetX, fishY - 28 + tailWag + fishOffsetY);

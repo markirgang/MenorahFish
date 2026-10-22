@@ -236,9 +236,10 @@ def update_menorah_fish_background_loop():
                 fish["neck_position"] = target_pos
                 fish["neck_motor_pwm"] = 100  # Held active forward to hold neck extended against OEM spring while talking
 
-                # Head spotlight bright & tail motor wagging (L298 Ch B Reverse Polarity) during speech
+                # Head spotlight bright during speech.
+                # NOTE: Tail motor CANNOT wag while speaking/singing because Channel 2 is in Forward Polarity for the neck motor!
                 fish["head_spotlight"] = True
-                fish["tail_motor"] = True
+                fish["tail_motor"] = False
 
                 # Dreidel Left & Right Servos sweep back & forth during speech
                 sweep = int(90 + math.sin(now * 3.5) * 45)
