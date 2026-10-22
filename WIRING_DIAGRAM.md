@@ -1,7 +1,7 @@
 # 🦜 ANIMATRONIC MENORAH FISH & CANDLE LIGHTING ROBOT ARM STAGE
 ## HARDWARE WIRING DIAGRAM & SYSTEM SCHEMATIC GUIDE
 
-This document details all physical hardware connections, Raspberry Pi GPIO pin mappings, 120VAC Solid State Relays (SSRs), MOSFET power transistors for stage lighting, PCA9685 PWM channel assignments, L298N motor driver connections, Menorah candle light bulbs, light domes, and power distribution rails.
+This document details all physical hardware connections, Raspberry Pi GPIO pin mappings, 120VAC Solid State Relays (SSRs), PCA9685 12-bit PWM channel assignments driving 3.3V logic / 12V power supply MOSFET power transistors for stage lighting, L298N motor driver connections, Menorah candle light bulbs, light domes, and power distribution rails.
 
 ---
 
@@ -10,36 +10,40 @@ This document details all physical hardware connections, Raspberry Pi GPIO pin m
 ```
 +-----------------------------------------------------------------------------------+
 |                                  MAIN POWER SUPPLY                                |
-|  120VAC Line (Solid State Relays)          +5V / +6V @ 12A DC (Servos & Motors)   |
-|  +5V @ 3A DC (Raspberry Pi Logic)                                                 |
+|  120VAC Line (Solid State Relays)          +12V DC @ 10A (MOSFET Dimmable Lights)  |
+|  +5V / +6V @ 12A DC (Servos & Motors)      +5V @ 3A DC (Raspberry Pi Logic)       |
 +------------------------------------------+----------------------------------------+
                                            |
                                            v
 +-----------------------------------------------------------------------------------+
 |                              RASPBERRY PI 4 / 5 MCU                               |
 | - 40-Pin GPIO Header                                                              |
-| - I2C Bus (SDA: GPIO 2, SCL: GPIO 3)                                              |
+| - I2C Bus (SDA: GPIO 2, SCL: GPIO 3) -> PCA9685 PWM Servo & MOSFET Controller    |
 | - 120VAC SSR Outputs: GPIO 4, 17, 27, 22, 10, 9, 11, 5, 6, 13 (3.3V DC Trigger)   |
-| - MOSFET Dimmable Lighting: GPIO 12 (Domes PWM), 16, 20, 21 (Spotlights PWM)      |
 | - L298N Motor Driver: GPIO 18 ENA, 23 IN1, 24 IN2, 19 ENB, 25 IN3, 8 IN4          |
 +-----+----------------------+---------------------+--------------------------------+
       | (I2C Bus)            | (PWM & GPIO)        | (120VAC SSR Triggers)
       v                      v                     v
 +-----+--------------+  +----+---------------+  +--+--------------------------------+
 | PCA9685 16-CHANNEL |  | SINGLE L298N DUAL  |  | 10x 120VAC SOLID STATE RELAYS     |
-| 12-BIT PWM DRIVER  |  | H-BRIDGE DRIVER    |  | & MOSFET DIMMABLE STAGE LIGHTING  |
-| (I2C Addr: 0x40)   |  | (Ch 1 & Ch 2)      |  | (8 Side + 1 Shamash + Claw Candle)|
-+-----+--------------+  +----+---------------+  +--+--------------------------------+
-      |                      |                     |
-      v                      v                     v
-+-----+----------------------+---------------------+--------------------------------+
-|                       ANIMATRONIC STAGE ACTUATORS & ENDPOINTS                     |
+| 12-BIT PWM DRIVER  |  | H-BRIDGE DRIVER    |  | (8 Side + 1 Shamash + Claw Candle)|
+| (I2C Addr: 0x40)   |  | (Ch 1 & Ch 2)      |  | 3.3V DC Input / 120VAC Line       |
++-----+--------------+  +----+---------------+  +-----------------------------------+
+      |                      |
+      | (PCA9685 PWM to MOSFETs: 3.3V Gate / 12V Power)
+      v                      v
++-----+----------------------+------------------------------------------------------+
+|                       ANIMATRONIC STAGE ACTUATORS & DC LIGHTS                     |
 | - Animatronic Fish: Original OEM Mouth DC Motor (L298 Ch 1 Fwd), Original OEM     |
 |   Neck Motor (L298 Ch 2 Fwd) & Original OEM Tail Motor (L298 Ch 2 Rev)            |
 | - Stage Servos & Dreidels: Mouth-Side & Tail-Side Servos with Spinning Dreidels   |
 | - 5-DOF Robot Arm: Base, Shoulder, Elbow, Wrist, Claw holding Flickering Candle   |
 | - 120VAC Menorah Candles: 8 Side Candles + 1 Center Shamash + 1 Claw Candle (SSRs) |
-| - MOSFET Dimmable Stage Lights: 4 Light Domes (Breathing/Chases) + 3 Spotlights  |
+| - PCA9685 -> 3.3V Gate / 12V Power MOSFET DC Lights:                              |
+|   * PCA Ch 6: Center Fish Mouth Spotlight MOSFET PWM Dimmer                       |
+|   * PCA Ch 7: Left Dreidel Spotlight MOSFET PWM Dimmer                            |
+|   * PCA Ch 8: Right Dreidel Spotlight MOSFET PWM Dimmer                           |
+|   * PCA Ch 9: 4 Stage Light Domes MOSFET PWM Dimmer (Breathing / Chases)          |
 +-----------------------------------------------------------------------------------+
 ```
 
@@ -49,10 +53,10 @@ This document details all physical hardware connections, Raspberry Pi GPIO pin m
 
 | Header Pin # | GPIO Name | Signal Description | Target Module Connected | Function Description |
 | :---: | :---: | :--- | :--- | :--- |
-| **Pin 1** | 3.3V Power | Logic VCC (3.3V) | Sensors / Optional Logic | 3.3V Logic Reference |
+| **Pin 1** | 3.3V Power | Logic VCC (3.3V) | Sensors / Logic Reference | 3.3V Logic Reference |
 | **Pin 2** | 5V Power | Logic VCC (5V) | PCA9685 VCC & Relays | 5V Logic VCC Rail |
-| **Pin 3** | GPIO 2 (SDA1) | I2C Serial Data | PCA9685 SDA Terminal | I2C Data for 16-Ch Servo Controller |
-| **Pin 5** | GPIO 3 (SCL1) | I2C Serial Clock | PCA9685 SCL Terminal | I2C Clock for 16-Ch Servo Controller |
+| **Pin 3** | GPIO 2 (SDA1) | I2C Serial Data | PCA9685 SDA Terminal | I2C Data for 16-Ch Servo & MOSFET Controller |
+| **Pin 5** | GPIO 3 (SCL1) | I2C Serial Clock | PCA9685 SCL Terminal | I2C Clock for 16-Ch Servo & MOSFET Controller |
 | **Pin 6** | Ground (GND) | Common Ground | Common GND Bus | Shared Ground Reference |
 | **Pin 7** | GPIO 4 | Digital Output | Claw Candle 120VAC SSR | 3.3V DC Trigger for 120VAC Claw Candle |
 | **Pin 11** | GPIO 17 | Digital Output | Center Shamash 120VAC SSR | 3.3V DC Trigger for 120VAC Shamash Candle |
@@ -64,10 +68,6 @@ This document details all physical hardware connections, Raspberry Pi GPIO pin m
 | **Pin 29** | GPIO 5 | Digital Output | Side Candle 6 120VAC SSR | 3.3V DC Trigger for 120VAC Side Candle 6 |
 | **Pin 31** | GPIO 6 | Digital Output | Side Candle 7 120VAC SSR | 3.3V DC Trigger for 120VAC Side Candle 7 |
 | **Pin 33** | GPIO 13 | Digital Output | Side Candle 8 120VAC SSR | 3.3V DC Trigger for 120VAC Side Candle 8 |
-| **Pin 32** | GPIO 12 (PWM) | PWM Output | 4 Stage Domes MOSFET | MOSFET Gate for Dimmable Breathing Domes |
-| **Pin 36** | GPIO 16 (PWM) | PWM Output | Fish Spotlight MOSFET | MOSFET Gate for Fish Mouth Spotlight PWM |
-| **Pin 38** | GPIO 20 (PWM) | PWM Output | Left Dreidel Spotlight MOSFET | MOSFET Gate for Left Dreidel Spotlight PWM |
-| **Pin 40** | GPIO 21 (PWM) | PWM Output | Right Dreidel Spotlight MOSFET | MOSFET Gate for Right Dreidel Spotlight PWM |
 | **Pin 12** | GPIO 18 (PWM) | PWM Output | L298N ENA (Mouth Speed PWM) | Channel 1: OEM Mouth Motor PWM |
 | **Pin 16** | GPIO 23 | Digital Output | L298N IN1 (Mouth Dir 1) | Channel 1: OEM Mouth Forward Polarity |
 | **Pin 18** | GPIO 24 | Digital Output | L298N IN2 (Mouth Dir 2) | Channel 1: OEM Mouth Reverse Polarity |
@@ -77,16 +77,22 @@ This document details all physical hardware connections, Raspberry Pi GPIO pin m
 
 ---
 
-## 🎛️ 2. PCA9685 16-CHANNEL PWM SERVO DRIVER (I2C Addr: 0x40)
+## 🎛️ 2. PCA9685 16-CHANNEL PWM SERVO & MOSFET LIGHTING DRIVER (I2C Addr: 0x40)
 
-| Channel # | Connected Hardware Output | Function Description | Signal Range |
+| Channel # | Connected Hardware Output | Function Description | Signal Range & Voltage |
 | :---: | :--- | :--- | :---: |
-| **Ch 0** | Robot Arm Joint 1 Base | Base Rotation Servo (-90° to +90°) | 500μs - 2500μs |
-| **Ch 1** | Robot Arm Joint 2 Shoulder | Shoulder Pitch Servo (-90° to +90°) | 500μs - 2500μs |
-| **Ch 2** | Robot Arm Joint 3 Elbow | Elbow Pitch Servo (-135° to +135°) | 500μs - 2500μs |
-| **Ch 3** | Mouth-Side Servo & Dreidel | Sweeps Mouth-Side Servo & Spinning Dreidel | 500μs - 2500μs |
-| **Ch 4** | Tail-Side Servo & Dreidel | Sweeps Tail-Side Servo & Spinning Dreidel | 500μs - 2500μs |
-| **Ch 5** | Robot Arm Joint 4/5 Claw | Wrist & Gripper Claw holding Candle | 500μs - 2500μs |
+| **Ch 0** | Robot Arm Joint 1 Base | Base Rotation Servo (-90° to +90°) | 500μs - 2500μs (5V) |
+| **Ch 1** | Robot Arm Joint 2 Shoulder | Shoulder Pitch Servo (-90° to +90°) | 500μs - 2500μs (5V) |
+| **Ch 2** | Robot Arm Joint 3 Elbow | Elbow Pitch Servo (-135° to +135°) | 500μs - 2500μs (5V) |
+| **Ch 3** | Mouth-Side Servo & Dreidel | Sweeps Mouth-Side Servo & Spinning Dreidel | 500μs - 2500μs (5V) |
+| **Ch 4** | Tail-Side Servo & Dreidel | Sweeps Tail-Side Servo & Spinning Dreidel | 500μs - 2500μs (5V) |
+| **Ch 5** | Robot Arm Joint 4/5 Claw | Wrist & Gripper Claw holding Candle | 500μs - 2500μs (5V) |
+| **Ch 6** | Center Fish Mouth Spotlight MOSFET | 3.3V Gate MOSFET -> 12V DC Fish Mouth Spotlight | 0% - 100% PWM (12V) |
+| **Ch 7** | Left Dreidel Spotlight MOSFET | 3.3V Gate MOSFET -> 12V DC Left Dreidel Spotlight | 0% - 100% PWM (12V) |
+| **Ch 8** | Right Dreidel Spotlight MOSFET | 3.3V Gate MOSFET -> 12V DC Right Dreidel Spotlight | 0% - 100% PWM (12V) |
+| **Ch 9** | 4 Stage Light Domes MOSFET | 3.3V Gate MOSFET -> 12V DC 4 Stage Light Domes | 0% - 100% PWM (12V) |
+| **Ch 10** | Fish Head Spotlight Pan Servo | Fish Head Spotlight Servo Pan | 500μs - 2500μs (5V) |
+| **Ch 11** | Fish Head Spotlight Tilt Servo | Fish Head Spotlight Servo Tilt | 500μs - 2500μs (5V) |
 
 ---
 
@@ -102,21 +108,21 @@ This document details all physical hardware connections, Raspberry Pi GPIO pin m
   - `IN3` -> **GPIO 25** (Pin 22) | `IN4` -> **GPIO 8** (Pin 24)
   - *Forward Polarity (`IN3=HIGH, IN4=LOW` with 100% PWM):* Powers original OEM neck motor forward to swing fish head/neck out horizontally facing the audience and holds it extended continuously while talking against the original OEM return spring.
   - *Depower (`IN3=LOW, IN4=LOW`, 0% PWM):* Cuts power to neck motor when done talking, allowing the original OEM return spring to pull the fish head/neck back flat against the wall plaque.
-  - *Reverse Polarity (`IN3=LOW, IN4=HIGH` with 80% PWM):* Powers original OEM tail motor mechanism for tail wagging! (Note: Active ONLY when NOT speaking because Channel 2 is dedicated to Forward Polarity for the neck motor while talking).
+  - *Reverse Polarity (`IN3=LOW, IN4=HIGH` with 80% PWM):* Powers original OEM tail motor mechanism for tail wagging! (Active ONLY when NOT speaking).
 
 ---
 
-## 💡 4. 120VAC SOLID STATE RELAYS (SSRs) & MOSFET LIGHTING
+## 💡 4. 120VAC SOLID STATE RELAYS (SSRs) & PCA9685-DRIVEN MOSFET DC LIGHTING
 
 1. **120VAC Menorah & Claw Candles (3.3V DC Input Solid State Relays):**
    - 10 Solid State Relays (SSRs) with 3.3V DC trigger inputs driven directly by Raspberry Pi GPIO pins (`GPIO 4, 17, 27, 22, 10, 9, 11, 5, 6, 13`).
    - `HIGH` (+3.3V DC) turns ON the corresponding 120VAC candle bulb; `LOW` turns it OFF.
 
-2. **Dimmable Stage Domes & Spotlights (MOSFET Power Transistors):**
-   - Solid state MOSFET power switches / power transistors driven by Raspberry Pi PWM GPIO pins (`GPIO 12` for Domes, `GPIO 16, 20, 21` for Spotlights).
-   - Allows full smooth PWM brightness control:
-     - **Fish Speaking**: 4 Stage Light Domes "breathe" slowly in unison / smooth PWM sine wave pulse (`50%` -> `100%` -> `50%`).
-     - **Fish Dancing**: 4 Stage Light Domes flash and perform running light chases around the 4 stage positions!
+2. **Dimmable DC Stage Domes & Spotlights (PCA9685 -> 3.3V Gate / 12V Power MOSFETs):**
+   - ALL DC stage lights are driven by **PCA9685 12-bit PWM channels** controlling **MOSFET power transistors with 3.3V gate inputs and 12V DC power supplies** (`PCA Ch 6` Center Spotlight, `PCA Ch 7` Left Dreidel Spotlight, `PCA Ch 8` Right Dreidel Spotlight, `PCA Ch 9` 4 Stage Light Domes).
+   - Enables full 12-bit PWM brightness control:
+     - **Fish Speaking**: 4 Stage Light Domes "breathe" slowly in unison / smooth 12-bit PWM sine wave pulse (`50%` -> `100%` -> `50%`).
+     - **Fish Dancing**: 4 Stage Light Domes flash and perform running light chases around the stage positions!
      - **Spotlights**: Fully illuminated during speech/dance, dimmed or off during idle states.
 
 3. **Common Ground:**
