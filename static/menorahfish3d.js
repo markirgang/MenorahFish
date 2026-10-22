@@ -35,14 +35,23 @@ class MenorahFish3D {
             this.controls.dampingFactor = 0.05;
             this.controls.target.set(0, 75, -20);
 
-            window.addEventListener('resize', () => {
+            const onResize = () => {
                 if (!this.container || !this.renderer || !this.camera) return;
-                const w = this.container.clientWidth || 800;
-                const h = this.container.clientHeight || 480;
-                this.camera.aspect = w / h;
-                this.camera.updateProjectionMatrix();
-                this.renderer.setSize(w, h);
-            });
+                const w = this.container.clientWidth || this.container.offsetWidth || 800;
+                const h = this.container.clientHeight || this.container.offsetHeight || 480;
+                if (w > 0 && h > 0) {
+                    this.camera.aspect = w / h;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(w, h);
+                }
+            };
+
+            window.addEventListener('resize', onResize);
+            if (window.ResizeObserver) {
+                const resizeObserver = new ResizeObserver(onResize);
+                resizeObserver.observe(this.container);
+            }
+            setTimeout(onResize, 100);
 
             this.clock = new THREE.Clock();
             this.webglSupported = true;
@@ -304,9 +313,12 @@ class MenorahFish3D {
         this.fishHeadGroup.add(this.fishMouthMesh);
 
         // Fish Head Spotlight
+        const fishHeadTarget = new THREE.Object3D();
+        fishHeadTarget.position.set(-82, -6, 0);
+        this.fishHeadGroup.add(fishHeadTarget);
         this.fishSpotlight = new THREE.SpotLight(0x00f0ff, 5.0, 400, Math.PI / 4, 0.3);
         this.fishSpotlight.position.set(-82, 45, 30);
-        this.fishSpotlight.target = this.fishMouthMesh;
+        this.fishSpotlight.target = fishHeadTarget;
         this.fishHeadGroup.add(this.fishSpotlight);
 
         // ENLARGED TAIL MOTOR & LARGE CAUDAL TAIL FIN (DRAMATIC TAIL WAGGING)
@@ -370,9 +382,13 @@ class MenorahFish3D {
         centerLamp.rotation.x = Math.PI / 3;
         centerPoleGroup.add(centerLamp);
 
+        const centerTarget = new THREE.Object3D();
+        centerTarget.position.set(0, 85, -120);
+        this.stageRoot.add(centerTarget);
+
         this.centerFishSpotlight = new THREE.SpotLight(0xfff5ea, 6.0, 500, Math.PI / 3, 0.2);
         this.centerFishSpotlight.position.set(0, 195, -170);
-        if (this.fishMouthMesh) this.centerFishSpotlight.target = this.fishMouthMesh;
+        this.centerFishSpotlight.target = centerTarget;
         this.stageRoot.add(this.centerFishSpotlight);
 
         // 2. Left Dreidel Servo Pole Spotlight (Tall pole illuminating Left Dreidel at X=-85, Z=-80)
@@ -398,9 +414,13 @@ class MenorahFish3D {
         leftLamp.rotation.x = Math.PI / 3;
         leftPoleGroup.add(leftLamp);
 
+        const leftTarget = new THREE.Object3D();
+        leftTarget.position.set(-85, 35, -80);
+        this.stageRoot.add(leftTarget);
+
         this.leftDreidelSpotlight = new THREE.SpotLight(0x00f0ff, 4.0, 300, Math.PI / 4, 0.25);
         this.leftDreidelSpotlight.position.set(-100, 158, -85);
-        if (this.dreidelLeftServoGroup) this.leftDreidelSpotlight.target = this.dreidelLeftServoGroup;
+        this.leftDreidelSpotlight.target = leftTarget;
         this.stageRoot.add(this.leftDreidelSpotlight);
 
         // 3. Right Dreidel Servo Pole Spotlight (Tall pole illuminating Right Dreidel at X=+85, Z=-80)
@@ -426,9 +446,13 @@ class MenorahFish3D {
         rightLamp.rotation.x = Math.PI / 3;
         rightPoleGroup.add(rightLamp);
 
+        const rightTarget = new THREE.Object3D();
+        rightTarget.position.set(85, 35, -80);
+        this.stageRoot.add(rightTarget);
+
         this.rightDreidelSpotlight = new THREE.SpotLight(0xff00cc, 4.0, 300, Math.PI / 4, 0.25);
         this.rightDreidelSpotlight.position.set(100, 158, -85);
-        if (this.dreidelRightServoGroup) this.rightDreidelSpotlight.target = this.dreidelRightServoGroup;
+        this.rightDreidelSpotlight.target = rightTarget;
         this.stageRoot.add(this.rightDreidelSpotlight);
     }
 
