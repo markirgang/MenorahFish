@@ -65,13 +65,20 @@ class MenorahFish3D {
             canvas.style.width = '100%';
             canvas.style.height = '100%';
             canvas.style.display = 'block';
+
+            this.container.innerHTML = '';
             this.container.appendChild(canvas);
 
             if (typeof THREE.OrbitControls === 'function') {
-                this.controls = new THREE.OrbitControls(this.camera, canvas);
-                this.controls.enableDamping = true;
-                this.controls.dampingFactor = 0.05;
-                this.controls.target.set(0, 75, -20);
+                try {
+                    this.controls = new THREE.OrbitControls(this.camera, canvas);
+                    this.controls.enableDamping = true;
+                    this.controls.dampingFactor = 0.05;
+                    this.controls.target.set(0, 75, -20);
+                } catch (cErr) {
+                    console.warn("OrbitControls initialization warning:", cErr);
+                    this.controls = { update: () => {} };
+                }
             } else {
                 this.controls = { update: () => {} };
             }
@@ -129,8 +136,8 @@ class MenorahFish3D {
             this.camera.position.set(0, 220, 420);
             this.controls.target.set(0, 80, -40);
         }
-        if (typeof this.controls.update === 'function') {
-            this.controls.update();
+        if (this.controls && typeof this.controls.update === 'function') {
+            try { this.controls.update(); } catch (e) {}
         }
     }
 
@@ -140,7 +147,7 @@ class MenorahFish3D {
 
         const dirLight = new THREE.DirectionalLight(0xfffaed, 0.85);
         dirLight.position.set(200, 400, 300);
-        if (this.renderer.shadowMap.enabled) {
+        if (this.renderer.shadowMap && this.renderer.shadowMap.enabled) {
             dirLight.castShadow = true;
         }
         this.scene.add(dirLight);
@@ -645,27 +652,27 @@ class MenorahFish3D {
         if (!this.webglSupported) return;
         requestAnimationFrame(() => this.animate());
 
-        const time = this.clock.getElapsedTime();
+        const time = this.clock ? this.clock.getElapsedTime() : 0;
         if (this.controls && typeof this.controls.update === 'function') {
-            this.controls.update();
+            try { this.controls.update(); } catch (e) {}
         }
 
         if (this.stageRoot) {
             this.stageRoot.rotation.y = 0;
         }
 
-        const fish = this.state.fish;
+        const fish = this.state.fish || {};
         const isSpeaking = !!this.state.is_speaking || !!fish.mouth_motor;
         const isDancing = !!this.state.is_dancing;
 
         if (this.fishNeckGroup) {
             const restAngle = Math.PI / 3.2;
             if (isSpeaking) {
-                if (fish.neck_position < 1.0) fish.neck_position = Math.min(1.0, fish.neck_position + 0.02);
+                if (fish.neck_position < 1.0) fish.neck_position = Math.min(1.0, (fish.neck_position || 0) + 0.02);
             } else if (!isDancing) {
-                if (fish.neck_position > 0.0) fish.neck_position = Math.max(0.0, fish.neck_position - 0.02);
+                if (fish.neck_position > 0.0) fish.neck_position = Math.max(0.0, (fish.neck_position || 0) - 0.02);
             }
-            const targetRad = restAngle - (fish.neck_position * (Math.PI / 3.2));
+            const targetRad = restAngle - ((fish.neck_position || 0) * (Math.PI / 3.2));
             this.fishNeckGroup.rotation.y += (targetRad - this.fishNeckGroup.rotation.y) * 0.08;
         }
 
@@ -707,11 +714,11 @@ class MenorahFish3D {
             }
         }
 
-        const arm = this.state.robot_arm;
-        if (this.armJ1Group) this.armJ1Group.rotation.y += ((arm.j1_base * Math.PI / 180) - this.armJ1Group.rotation.y) * 0.1;
-        if (this.armJ2Group) this.armJ2Group.rotation.z += ((arm.j2_shoulder * Math.PI / 180) - this.armJ2Group.rotation.z) * 0.1;
-        if (this.armJ3Group) this.armJ3Group.rotation.z += ((arm.j3_elbow * Math.PI / 180) - this.armJ3Group.rotation.z) * 0.1;
-        if (this.armJ4Group) this.armJ4Group.rotation.z += ((arm.j4_wrist * Math.PI / 180) - this.armJ4Group.rotation.z) * 0.1;
+        const arm = this.state.robot_arm || {};
+        if (this.armJ1Group) this.armJ1Group.rotation.y += (((arm.j1_base || 0) * Math.PI / 180) - this.armJ1Group.rotation.y) * 0.1;
+        if (this.armJ2Group) this.armJ2Group.rotation.z += (((arm.j2_shoulder || 30) * Math.PI / 180) - this.armJ2Group.rotation.z) * 0.1;
+        if (this.armJ3Group) this.armJ3Group.rotation.z += (((arm.j3_elbow || 45) * Math.PI / 180) - this.armJ3Group.rotation.z) * 0.1;
+        if (this.armJ4Group) this.armJ4Group.rotation.z += (((arm.j4_wrist || 0) * Math.PI / 180) - this.armJ4Group.rotation.z) * 0.1;
 
         if (this.clawFlameMesh && this.clawFlameLight) {
             const flicker = 0.85 + Math.sin(time * 18) * 0.15;
@@ -719,9 +726,10 @@ class MenorahFish3D {
             this.clawFlameLight.intensity = 2.5 * flicker;
         }
 
-        if (this.candleObjs && this.state.menorah.candles) {
+        const menorah = this.state.menorah || {};
+        if (this.candleObjs && menorah.candles) {
             this.candleObjs.forEach((obj, idx) => {
-                const isLit = !!this.state.menorah.candles[idx];
+                const isLit = !!menorah.candles[idx];
                 const flicker = isLit ? (0.8 + Math.sin(time * 14 + idx) * 0.2) : 0.0;
                 obj.flameMat.emissiveIntensity = isLit ? (0.9 + flicker * 0.3) : 0.0;
                 obj.candleLight.intensity = isLit ? (2.0 + flicker) : 0.0;
@@ -750,7 +758,9 @@ class MenorahFish3D {
             }
         }
 
-        this.renderer.render(this.scene, this.camera);
+        if (this.renderer && this.scene && this.camera) {
+            this.renderer.render(this.scene, this.camera);
+        }
     }
 
     /* ---------------- 2D CANVAS FALLBACK ENGINE ---------------- */
@@ -787,7 +797,8 @@ class MenorahFish3D {
         const cx = w / 2;
         const cy = h / 2 + 30;
 
-        const isSpeaking = !!this.state.is_speaking || !!this.state.fish.mouth_motor;
+        const fish = this.state.fish || {};
+        const isSpeaking = !!this.state.is_speaking || !!fish.mouth_motor;
         const isDancing = !!this.state.is_dancing;
 
         // Stage Ground Ring
@@ -802,6 +813,9 @@ class MenorahFish3D {
 
         // 180° Menorah Candle Arc
         const arcAngles = [-80, -60, -40, -20, 0, 20, 40, 60, 80];
+        const menorah = this.state.menorah || {};
+        const candles = menorah.candles || [];
+
         arcAngles.forEach((deg, idx) => {
             const rad = (deg - 90) * (Math.PI / 180);
             const isShamash = (idx === 4);
@@ -809,7 +823,7 @@ class MenorahFish3D {
             const candX = cx + Math.cos(rad) * r;
             const candY = cy + 40 + Math.sin(rad) * (r * 0.35);
 
-            const isLit = !!(this.state.menorah && this.state.menorah.candles && this.state.menorah.candles[idx]);
+            const isLit = !!candles[idx];
 
             // Candle Stand
             ctx.fillStyle = '#ffd700';
@@ -845,7 +859,7 @@ class MenorahFish3D {
         ctx.stroke();
 
         // Fish Body
-        const neckPos = this.state.fish.neck_position || 0;
+        const neckPos = fish.neck_position || 0;
         const fishOffsetX = Math.sin(time * 2) * 4 - neckPos * 25;
         const mouthOpenScale = isSpeaking ? (1 + Math.abs(Math.sin(time * 16)) * 0.6) : 1;
 
@@ -878,7 +892,7 @@ class MenorahFish3D {
         ctx.fill();
 
         // Tail Fin
-        const tailWag = (this.state.fish.tail_motor || isSpeaking || isDancing) ? Math.sin(time * 14) * 12 : 0;
+        const tailWag = (fish.tail_motor || isSpeaking || isDancing) ? Math.sin(time * 14) * 12 : 0;
         ctx.beginPath();
         ctx.moveTo(cx + 50 + fishOffsetX, fishY);
         ctx.lineTo(cx + 85 + fishOffsetX, fishY - 25 + tailWag);
