@@ -3,14 +3,19 @@
  */
 
 function startApp() {
-    // 1. Initialize 3D Visualizer (Safely wrapped)
+    // 1. Initialize 3D Visualizer (Safely wrapped with retry)
     let visualizer = null;
-    try {
-        visualizer = new MenorahFish3D('stage3dContainer');
-        window.visualizer = visualizer;
-    } catch (e) {
-        console.warn("3D Visualizer initialization bypassed:", e);
+    function initVisualizer() {
+        if (!visualizer && typeof MenorahFish3D === 'function') {
+            try {
+                visualizer = new MenorahFish3D('stage3dContainer');
+                window.visualizer = visualizer;
+            } catch (e) {
+                console.warn("3D Visualizer initialization bypassed:", e);
+            }
+        }
     }
+    initVisualizer();
 
     // State object
     let localState = {
@@ -474,6 +479,7 @@ function startApp() {
 
     // --- 5. STATE POLL & SYNC LOOP & TELEMETRY HUD UPDATE ---
     setInterval(() => {
+        if (!visualizer) initVisualizer();
         fetch('/api/menorah/state')
             .then(r => r.json())
             .then(data => {

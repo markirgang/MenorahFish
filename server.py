@@ -96,6 +96,11 @@ class CameraStream:
                     self._close_cameras()
                     time.sleep(0.5)
 
+            elif cur_source == "virtual":
+                with self.lock:
+                    self.frame = generate_synthetic_camera_frame()
+                time.sleep(0.5)
+
             else:
                 if self.cap is None or not self.cap.isOpened():
                     self._close_cameras()
@@ -125,7 +130,8 @@ class CameraStream:
                     if not opened:
                         with self.lock:
                             self.frame = generate_synthetic_camera_frame()
-                        time.sleep(2.0)
+                            self.source = "virtual"
+                        time.sleep(0.5)
 
                 if self.cap and self.cap.isOpened():
                     try:
@@ -777,11 +783,14 @@ class ThreadingReusableTCPServer(socketserver.ThreadingMixIn, socketserver.TCPSe
         newsocket, fromaddr = self.socket.accept()
         if self.ssl_context:
             try:
+                newsocket.settimeout(1.5)
                 first_byte = newsocket.recv(1, socket.MSG_PEEK)
-                if first_byte and first_byte[0] == 0x16:
+                if first_byte and len(first_byte) > 0 and first_byte[0] == 0x16:
                     newsocket = self.ssl_context.wrap_socket(newsocket, server_side=True)
+                newsocket.settimeout(None)
             except Exception:
-                pass
+                try: newsocket.settimeout(None)
+                except Exception: pass
         return newsocket, fromaddr
 
 if __name__ == "__main__":
