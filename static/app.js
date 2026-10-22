@@ -7,6 +7,7 @@ function startApp() {
     let visualizer = null;
     try {
         visualizer = new MenorahFish3D('stage3dContainer');
+        window.visualizer = visualizer;
     } catch (e) {
         console.warn("3D Visualizer initialization bypassed:", e);
     }

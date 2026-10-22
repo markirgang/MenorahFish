@@ -24,10 +24,15 @@ class MenorahFish3D {
             this.camera = new THREE.PerspectiveCamera(45, width / height, 1, 3000);
             this.camera.position.set(0, 200, 390);
 
-            this.renderer = new THREE.WebGLRenderer({ antialias: true });
+            try {
+                this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            } catch (rendererErr) {
+                console.warn("Primary WebGLRenderer fallback to basic context:", rendererErr);
+                this.renderer = new THREE.WebGLRenderer({ antialias: false });
+            }
             this.renderer.setSize(width, height);
-            this.renderer.shadowMap.enabled = true;
-            this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             this.container.appendChild(this.renderer.domElement);
 
             this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
@@ -222,9 +227,13 @@ class MenorahFish3D {
         }
 
         // Dedicated High-Intensity Plaque & Trout Spotlight
+        const plaqueTarget = new THREE.Object3D();
+        plaqueTarget.position.set(0, 85, 0);
+        this.fishRoot.add(plaqueTarget);
+
         const plaqueLight = new THREE.SpotLight(0xfff5ea, 6.0, 500, Math.PI / 3, 0.2);
         plaqueLight.position.set(0, 180, 150);
-        plaqueLight.target = plaqueGroup;
+        plaqueLight.target = plaqueTarget;
         this.fishRoot.add(plaqueLight);
 
         // --- FISH NECK SWING HINGE (MOUNTED ON FRONT SURFACE OF PLAQUE) ---
