@@ -578,8 +578,8 @@ body {
 }
     </style>
     <!-- Three.js & OrbitControls -->
-    <script src="lib/three.min.js"></script>
-    <script src="lib/OrbitControls.js"></script>
+    <script src="/lib/three.min.js"></script>
+    <script src="/lib/OrbitControls.js"></script>
     <script>
         function switchTab(targetTabId) {
             if (!targetTabId) return;
@@ -605,6 +605,8 @@ body {
                 initWiringDiagramEngine();
             } else if (targetTabId === 'tabConfig' && typeof populateMediaDevices === 'function') {
                 populateMediaDevices();
+            } else if (targetTabId === 'tabStage' && typeof window.visualizer !== 'undefined' && window.visualizer && typeof window.visualizer.onWindowResize === 'function') {
+                window.visualizer.onWindowResize();
             }
         }
     </script>
@@ -1368,7 +1370,7 @@ body {
     </div>
 
     <!-- Application Scripts -->
-    <script src="menorahfish3d.js"></script>
-    <script src="app.js"></script>
+    <script src="/menorahfish3d.js?v=20261021"></script>
+    <script src="/app.js?v=20261021"></script>
 </body>
 </html>
