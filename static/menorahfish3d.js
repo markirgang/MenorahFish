@@ -1,7 +1,8 @@
 /**
  * Animatronic Menorah Fish & Candle Robot Arm Stage Visualizer (Three.js 3D & Interactive 2D Canvas Fallback)
  * Visualizes:
- * - Animatronic Gemmy Singing Trout with mouth lipsync, 3-second gradual horizontal neck swing, tail wagging, and head spotlight
+ * - Authentic Gemmy Big Mouth Billy Bass / Singing Trout on Wooden Plaque
+ * - Articulated mouth lipsync (hinged lower jaw opening revealing red inner mouth), 3-second gradual horizontal neck swing out towards viewer, fast caudal tail wagging, and head spotlight
  * - Mouth-side and Tail-side stage servos with spinning dreidels
  * - 4 Stage Light Domes that breathe slowly in sequence while fish is talking/singing
  * - 5-DOF Robot Arm with claw holding a CONSTANTLY LIT FLICKERING CANDLE
@@ -211,40 +212,46 @@ class MenorahFish3D {
         this.fishRoot.position.set(0, 0, -180);
         this.stageRoot.add(this.fishRoot);
 
+        // --- 1. GEMMY OVAL TROPHY WOODEN WALL PLAQUE ---
         const plaqueGroup = new THREE.Group();
         plaqueGroup.position.set(0, 85, 0);
         this.fishRoot.add(plaqueGroup);
 
-        const plaqueGeo = new THREE.CylinderGeometry(110, 110, 12, 64);
-        plaqueGeo.scale(1.6, 1.05, 0.8);
-        const plaqueMat = new THREE.MeshStandardMaterial({ color: 0x4a2410, roughness: 0.3, metalness: 0.1 });
+        // Polished Oval Wooden Backboard
+        const plaqueGeo = new THREE.CylinderGeometry(110, 110, 14, 64);
+        plaqueGeo.scale(1.65, 1.1, 0.85);
+        const plaqueMat = new THREE.MeshStandardMaterial({ color: 0x3d1e08, roughness: 0.3, metalness: 0.1 });
         const plaqueMesh = new THREE.Mesh(plaqueGeo, plaqueMat);
         plaqueMesh.rotation.x = Math.PI / 2;
         plaqueGroup.add(plaqueMesh);
 
+        // Brass Bezel Outer Trim Ring
         const trimMesh = new THREE.Mesh(
-            new THREE.TorusGeometry(108, 4, 16, 64),
+            new THREE.TorusGeometry(112, 5, 16, 64),
             new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9, roughness: 0.1 })
         );
-        trimMesh.position.z = 6;
+        trimMesh.position.z = 7;
         plaqueGroup.add(trimMesh);
 
+        // Brass Nameplate ("GEMMY BIG MOUTH BILLY BASS & TROUT")
         const nameplateMesh = new THREE.Mesh(
-            new THREE.BoxGeometry(110, 22, 3),
-            new THREE.MeshStandardMaterial({ color: 0xcc9900, metalness: 0.9 })
+            new THREE.BoxGeometry(115, 24, 4),
+            new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.9, roughness: 0.2 })
         );
-        nameplateMesh.position.set(0, -70, 7);
+        nameplateMesh.position.set(0, -75, 8);
         plaqueGroup.add(nameplateMesh);
 
+        // Plaque Mounting Stand Posts
         for (let side of [-75, 75]) {
             const postMesh = new THREE.Mesh(
-                new THREE.CylinderGeometry(8, 9, 100, 16),
+                new THREE.CylinderGeometry(8, 10, 100, 16),
                 new THREE.MeshStandardMaterial({ color: 0x111a28, metalness: 0.8 })
             );
             postMesh.position.set(side, -50, -6);
             this.fishRoot.add(postMesh);
         }
 
+        // Dedicated High-Intensity Plaque & Trout Spotlight
         const plaqueTarget = new THREE.Object3D();
         plaqueTarget.position.set(0, 85, 0);
         this.fishRoot.add(plaqueTarget);
@@ -254,97 +261,143 @@ class MenorahFish3D {
         plaqueLight.target = plaqueTarget;
         this.fishRoot.add(plaqueLight);
 
+        // --- 2. MECHANICAL SWING-OUT NECK BRACKET & HINGE ---
         this.fishNeckGroup = new THREE.Group();
-        this.fishNeckGroup.position.set(-35, 85, 14);
+        this.fishNeckGroup.position.set(-25, 85, 14); // Mounted on front of plaque
         this.fishRoot.add(this.fishNeckGroup);
 
+        // Metallic Hinge Arm
         const hingeArm = new THREE.Mesh(
-            new THREE.BoxGeometry(24, 18, 55),
-            new THREE.MeshStandardMaterial({ color: 0x778899, metalness: 0.8 })
+            new THREE.BoxGeometry(28, 20, 60),
+            new THREE.MeshStandardMaterial({ color: 0x8899aa, metalness: 0.9, roughness: 0.2 })
         );
-        hingeArm.position.set(0, 0, 27.5);
+        hingeArm.position.set(0, 0, 30);
         this.fishNeckGroup.add(hingeArm);
 
+        // --- 3. GEMMY FISH HEAD & BODY ASSEMBLY ---
         this.fishHeadGroup = new THREE.Group();
-        this.fishHeadGroup.position.set(0, 0, 55);
+        this.fishHeadGroup.position.set(0, 0, 60);
         this.fishNeckGroup.add(this.fishHeadGroup);
 
+        // Main Body Torso
         const bodyGeo = new THREE.SphereGeometry(48, 32, 16);
         bodyGeo.scale(2.2, 1.25, 0.85);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2e8b57, metalness: 0.6, roughness: 0.2 });
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0x2e6f33, metalness: 0.4, roughness: 0.3 });
         const bodyMesh = new THREE.Mesh(bodyGeo, bodyMat);
         bodyMesh.position.set(0, 0, 0);
         this.fishHeadGroup.add(bodyMesh);
 
+        // Rainbow / Pink / Gold Lateral Stripe
         const stripeMesh = new THREE.Mesh(
-            new THREE.BoxGeometry(150, 16, 30),
-            new THREE.MeshStandardMaterial({ color: 0xff1493, metalness: 0.8, roughness: 0.1 })
+            new THREE.BoxGeometry(155, 18, 32),
+            new THREE.MeshStandardMaterial({ color: 0xff1493, metalness: 0.7, roughness: 0.2 })
         );
         stripeMesh.position.set(0, 0, 6);
         this.fishHeadGroup.add(stripeMesh);
 
+        // Cream / White Belly
         const bellyMesh = new THREE.Mesh(
-            new THREE.SphereGeometry(40, 32, 16),
-            new THREE.MeshStandardMaterial({ color: 0xf5f8ff, roughness: 0.3 })
+            new THREE.SphereGeometry(42, 32, 16),
+            new THREE.MeshStandardMaterial({ color: 0xfffde7, roughness: 0.4 })
         );
         bellyMesh.position.set(0, -18, 4);
-        bellyMesh.scale.set(1.8, 0.8, 0.8);
+        bellyMesh.scale.set(1.85, 0.8, 0.8);
         this.fishHeadGroup.add(bellyMesh);
 
-        const dorsalGeo = new THREE.ConeGeometry(18, 45, 16);
+        // Dorsal Fin (Top Fin)
+        const dorsalGeo = new THREE.ConeGeometry(20, 50, 16);
         dorsalGeo.scale(1.2, 1.0, 0.15);
-        const dorsalMesh = new THREE.Mesh(dorsalGeo, new THREE.MeshStandardMaterial({ color: 0x228b22, metalness: 0.6 }));
-        dorsalMesh.position.set(-10, 52, 0);
+        const dorsalMesh = new THREE.Mesh(dorsalGeo, new THREE.MeshStandardMaterial({ color: 0x1e4a22, metalness: 0.5 }));
+        dorsalMesh.position.set(-10, 55, 0);
         dorsalMesh.rotation.z = -0.3;
         this.fishHeadGroup.add(dorsalMesh);
 
+        // Pectoral Fins (Front Side Fins)
         for (let side of [-1, 1]) {
             const finMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(32, 3, 24),
-                new THREE.MeshStandardMaterial({ color: 0x3cb371, metalness: 0.5 })
+                new THREE.BoxGeometry(35, 4, 26),
+                new THREE.MeshStandardMaterial({ color: 0x2e8b57, metalness: 0.5 })
             );
-            finMesh.position.set(-35, -18, side * 24);
+            finMesh.position.set(-35, -20, side * 25);
             finMesh.rotation.z = -0.4;
             this.fishHeadGroup.add(finMesh);
         }
 
+        // Bulging Gemmy Eyes
         for (let side of [-1, 1]) {
             const eyeGroup = new THREE.Group();
-            eyeGroup.position.set(-60, 14, side * 22);
+            eyeGroup.position.set(-62, 16, side * 23);
             this.fishHeadGroup.add(eyeGroup);
 
-            const eyeSocket = new THREE.Mesh(new THREE.SphereGeometry(10, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 }));
+            const eyeSocket = new THREE.Mesh(new THREE.SphereGeometry(11, 16, 16), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 }));
             eyeGroup.add(eyeSocket);
 
-            const pupil = new THREE.Mesh(new THREE.SphereGeometry(5.5, 16, 16), new THREE.MeshBasicMaterial({ color: 0x000000 }));
-            pupil.position.z = side * 5.5;
+            const pupil = new THREE.Mesh(new THREE.SphereGeometry(6, 16, 16), new THREE.MeshBasicMaterial({ color: 0x000000 }));
+            pupil.position.z = side * 6;
             eyeGroup.add(pupil);
+
+            const highlight = new THREE.Mesh(new THREE.SphereGeometry(2, 8, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            highlight.position.set(-2, 2, side * 7.5);
+            eyeGroup.add(highlight);
         }
 
-        this.fishMouthMesh = new THREE.Mesh(
-            new THREE.ConeGeometry(30, 48, 16),
+        // --- 4. ARTICULATED SNOUT & HINGED LOWER JAW (DRAMATIC MOUTH LIPSYNC) ---
+        // Fixed Upper Jaw / Snout
+        const upperJawMesh = new THREE.Mesh(
+            new THREE.ConeGeometry(28, 42, 16),
+            new THREE.MeshStandardMaterial({ color: 0x2e6f33, metalness: 0.4 })
+        );
+        upperJawMesh.rotation.z = Math.PI / 2;
+        upperJawMesh.position.set(-82, 4, 0);
+        this.fishHeadGroup.add(upperJawMesh);
+
+        // Inner Red Mouth Cavity
+        const innerMouthMesh = new THREE.Mesh(
+            new THREE.SphereGeometry(22, 16, 16),
+            new THREE.MeshBasicMaterial({ color: 0x990022 })
+        );
+        innerMouthMesh.position.set(-80, -4, 0);
+        this.fishHeadGroup.add(innerMouthMesh);
+
+        // Hinged Lower Jaw
+        this.fishLowerJawGroup = new THREE.Group();
+        this.fishLowerJawGroup.position.set(-68, -10, 0); // Pivot hinge
+        this.fishHeadGroup.add(this.fishLowerJawGroup);
+
+        const lowerJawMesh = new THREE.Mesh(
+            new THREE.ConeGeometry(24, 38, 16),
             new THREE.MeshStandardMaterial({ color: 0x3cb371, metalness: 0.5 })
         );
-        this.fishMouthMesh.rotation.z = Math.PI / 2;
-        this.fishMouthMesh.position.set(-82, -6, 0);
-        this.fishHeadGroup.add(this.fishMouthMesh);
+        lowerJawMesh.rotation.z = Math.PI / 2;
+        lowerJawMesh.position.set(-16, -2, 0);
+        this.fishLowerJawGroup.add(lowerJawMesh);
 
+        // Fish Head Spotlight
         const fishHeadTarget = new THREE.Object3D();
-        fishHeadTarget.position.set(-82, -6, 0);
+        fishHeadTarget.position.set(-90, -6, 0);
         this.fishHeadGroup.add(fishHeadTarget);
-        this.fishSpotlight = new THREE.SpotLight(0x00f0ff, 5.0, 400, Math.PI / 4, 0.3);
-        this.fishSpotlight.position.set(-82, 45, 30);
+        this.fishSpotlight = new THREE.SpotLight(0x00f0ff, 6.0, 400, Math.PI / 4, 0.3);
+        this.fishSpotlight.position.set(-90, 50, 35);
         this.fishSpotlight.target = fishHeadTarget;
         this.fishHeadGroup.add(this.fishSpotlight);
 
+        // --- 5. TAIL HINGE & LARGE CAUDAL TAIL FIN (DRAMATIC TAIL WAGGING) ---
         this.fishTailGroup = new THREE.Group();
-        this.fishTailGroup.position.set(75, 0, 0);
+        this.fishTailGroup.position.set(78, 0, 0); // Tail hinge
         this.fishHeadGroup.add(this.fishTailGroup);
 
-        const finGeo = new THREE.ConeGeometry(40, 80, 16);
-        finGeo.scale(1.3, 1.3, 0.25);
-        const finMesh = new THREE.Mesh(finGeo, new THREE.MeshStandardMaterial({ color: 0x228b22, metalness: 0.7 }));
+        const tailStem = new THREE.Mesh(
+            new THREE.BoxGeometry(30, 28, 18),
+            new THREE.MeshStandardMaterial({ color: 0x2e6f33, metalness: 0.5 })
+        );
+        tailStem.position.x = 15;
+        this.fishTailGroup.add(tailStem);
+
+        const finGeo = new THREE.ConeGeometry(45, 85, 16);
+        finGeo.scale(1.35, 1.35, 0.25);
+        const finMesh = new THREE.Mesh(finGeo, new THREE.MeshStandardMaterial({ color: 0x1e4a22, metalness: 0.6 }));
         finMesh.rotation.z = -Math.PI / 2;
+        finMesh.position.x = 45;
         this.fishTailGroup.add(finMesh);
 
         this.dreidelLeftServoGroup = new THREE.Group();
@@ -665,24 +718,30 @@ class MenorahFish3D {
         const isSpeaking = !!this.state.is_speaking || !!fish.mouth_motor;
         const isDancing = !!this.state.is_dancing;
 
+        // 1. Neck Swing Out Motion (Swings head & body out 75° towards camera/viewer)
         if (this.fishNeckGroup) {
-            const restAngle = Math.PI / 3.2;
+            const restAngle = Math.PI / 2.8; // Rest stance facing right along plaque
             if (isSpeaking) {
-                if (fish.neck_position < 1.0) fish.neck_position = Math.min(1.0, (fish.neck_position || 0) + 0.02);
+                if (fish.neck_position < 1.0) fish.neck_position = Math.min(1.0, (fish.neck_position || 0) + 0.04);
             } else if (!isDancing) {
-                if (fish.neck_position > 0.0) fish.neck_position = Math.max(0.0, (fish.neck_position || 0) - 0.02);
+                if (fish.neck_position > 0.0) fish.neck_position = Math.max(0.0, (fish.neck_position || 0) - 0.03);
             }
-            const targetRad = restAngle - ((fish.neck_position || 0) * (Math.PI / 3.2));
-            this.fishNeckGroup.rotation.y += (targetRad - this.fishNeckGroup.rotation.y) * 0.08;
+            const swingAmount = (fish.neck_position || 0) * (Math.PI / 2.2);
+            const targetRad = restAngle - swingAmount;
+            this.fishNeckGroup.rotation.y += (targetRad - this.fishNeckGroup.rotation.y) * 0.12;
         }
 
-        if (this.fishMouthMesh) {
-            const mouthScale = (fish.mouth_motor || isSpeaking) ? (1.0 + Math.abs(Math.sin(time * 16)) * 0.5) : 1.0;
-            this.fishMouthMesh.scale.set(1.0, mouthScale, 1.0);
+        // 2. Hinged Lower Jaw Mouth Motion (Hinges downwards revealing inner mouth)
+        if (this.fishLowerJawGroup) {
+            const isMouthOpen = fish.mouth_motor || isSpeaking;
+            const openAngle = isMouthOpen ? (0.45 + Math.abs(Math.sin(time * 18)) * 0.35) : 0.05;
+            this.fishLowerJawGroup.rotation.z += (openAngle - this.fishLowerJawGroup.rotation.z) * 0.3;
         }
 
+        // 3. Fast Tail Wagging (Caudal fin energetic sweep)
         if (this.fishTailGroup) {
-            const tailSwing = (fish.tail_motor || isSpeaking || isDancing) ? Math.sin(time * 12) * 0.45 : Math.sin(time * 2) * 0.08;
+            const isWagging = fish.tail_motor || isSpeaking || isDancing;
+            const tailSwing = isWagging ? Math.sin(time * 18) * 0.55 : Math.sin(time * 2) * 0.08;
             this.fishTailGroup.rotation.y = tailSwing;
         }
 
@@ -847,25 +906,45 @@ class MenorahFish3D {
             }
         });
 
-        // Gemmy Trout Wooden Plaque & Fish (Top Back of Stage)
+        // Gemmy Trophy Wooden Oval Plaque & Fish (Top Back of Stage)
         const fishY = cy - 100;
         ctx.save();
+
+        // Plaque Wood
         ctx.beginPath();
-        ctx.ellipse(cx - 40, fishY, 130, 60, 0, 0, Math.PI * 2);
-        ctx.fillStyle = '#4a2410';
+        ctx.ellipse(cx - 40, fishY, 135, 62, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#3d1e08';
         ctx.fill();
         ctx.strokeStyle = '#ffd700';
         ctx.lineWidth = 4;
         ctx.stroke();
 
-        // Fish Body
-        const neckPos = fish.neck_position || 0;
-        const fishOffsetX = Math.sin(time * 2) * 4 - neckPos * 25;
-        const mouthOpenScale = isSpeaking ? (1 + Math.abs(Math.sin(time * 16)) * 0.6) : 1;
+        // Brass Nameplate
+        ctx.fillStyle = '#d4af37';
+        ctx.fillRect(cx - 90, fishY + 38, 100, 16);
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 8px sans-serif';
+        ctx.fillText('GEMMY BIG MOUTH BASS', cx - 85, fishY + 49);
 
+        // Fish Body & Swing-Out Neck
+        const neckPos = fish.neck_position || 0;
+        const fishOffsetX = Math.sin(time * 2) * 4 - neckPos * 35;
+        const fishOffsetY = neckPos * 12;
+
+        // Metallic Hinge Arm
+        if (neckPos > 0.05) {
+            ctx.strokeStyle = '#8899aa';
+            ctx.lineWidth = 8;
+            ctx.beginPath();
+            ctx.moveTo(cx - 30, fishY);
+            ctx.lineTo(cx - 30 + fishOffsetX, fishY + fishOffsetY);
+            ctx.stroke();
+        }
+
+        // Fish Torso
         ctx.beginPath();
-        ctx.ellipse(cx - 30 + fishOffsetX, fishY, 80, 32, 0, 0, Math.PI * 2);
-        ctx.fillStyle = '#2e8b57';
+        ctx.ellipse(cx - 30 + fishOffsetX, fishY + fishOffsetY, 82, 34, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#2e6f33';
         ctx.fill();
         ctx.strokeStyle = '#3cb371';
         ctx.lineWidth = 2;
@@ -873,32 +952,51 @@ class MenorahFish3D {
 
         // Lateral Stripe
         ctx.fillStyle = '#ff1493';
-        ctx.fillRect(cx - 90 + fishOffsetX, fishY - 6, 110, 12);
+        ctx.fillRect(cx - 90 + fishOffsetX, fishY - 6 + fishOffsetY, 115, 12);
+
+        // Cream Belly
+        ctx.beginPath();
+        ctx.ellipse(cx - 30 + fishOffsetX, fishY + 12 + fishOffsetY, 65, 18, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#fffde7';
+        ctx.fill();
 
         // Fish Eye
         ctx.beginPath();
-        ctx.arc(cx - 85 + fishOffsetX, fishY - 10, 7, 0, Math.PI * 2);
+        ctx.arc(cx - 85 + fishOffsetX, fishY - 12 + fishOffsetY, 8, 0, Math.PI * 2);
         ctx.fillStyle = '#ffd700';
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(cx - 87 + fishOffsetX, fishY - 10, 3.5, 0, Math.PI * 2);
+        ctx.arc(cx - 87 + fishOffsetX, fishY - 12 + fishOffsetY, 4, 0, Math.PI * 2);
         ctx.fillStyle = '#000000';
         ctx.fill();
 
-        // Fish Mouth
+        // Upper Snout
         ctx.beginPath();
-        ctx.ellipse(cx - 105 + fishOffsetX, fishY, 12, 10 * mouthOpenScale, 0, 0, Math.PI * 2);
-        ctx.fillStyle = '#1c5e3a';
+        ctx.ellipse(cx - 105 + fishOffsetX, fishY - 4 + fishOffsetY, 12, 8, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#2e6f33';
+        ctx.fill();
+
+        // Inner Red Mouth Cavity & Hinged Lower Jaw
+        const jawOpen = isSpeaking ? (10 + Math.abs(Math.sin(time * 18)) * 14) : 2;
+        ctx.beginPath();
+        ctx.ellipse(cx - 102 + fishOffsetX, fishY + 4 + fishOffsetY, 11, jawOpen, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#990022';
+        ctx.fill();
+
+        // Lower Jaw
+        ctx.beginPath();
+        ctx.ellipse(cx - 104 + fishOffsetX, fishY + 4 + jawOpen + fishOffsetY, 12, 6, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#3cb371';
         ctx.fill();
 
         // Tail Fin
-        const tailWag = (fish.tail_motor || isSpeaking || isDancing) ? Math.sin(time * 14) * 12 : 0;
+        const tailWag = (fish.tail_motor || isSpeaking || isDancing) ? Math.sin(time * 18) * 16 : 0;
         ctx.beginPath();
-        ctx.moveTo(cx + 50 + fishOffsetX, fishY);
-        ctx.lineTo(cx + 85 + fishOffsetX, fishY - 25 + tailWag);
-        ctx.lineTo(cx + 85 + fishOffsetX, fishY + 25 + tailWag);
+        ctx.moveTo(cx + 52 + fishOffsetX, fishY + fishOffsetY);
+        ctx.lineTo(cx + 90 + fishOffsetX, fishY - 28 + tailWag + fishOffsetY);
+        ctx.lineTo(cx + 90 + fishOffsetX, fishY + 28 + tailWag + fishOffsetY);
         ctx.closePath();
-        ctx.fillStyle = '#228b22';
+        ctx.fillStyle = '#1e4a22';
         ctx.fill();
         ctx.restore();
 
@@ -950,7 +1048,7 @@ class MenorahFish3D {
         ctx.save();
         ctx.fillStyle = isSpeaking ? '#00f0ff' : '#8a99ad';
         ctx.font = 'bold 12px sans-serif';
-        ctx.fillText(`🎭 STAGE VISUALIZER: ${isSpeaking ? '🐟 MENORAH FISH TALKING & LIGHTS BREATHING' : 'READY / IDLE'}`, 20, 30);
+        ctx.fillText(`🎭 STAGE VISUALIZER: ${isSpeaking ? '🐟 GEMMY FISH SINGING / NECK OUT / TAIL WAGGING' : 'READY / IDLE'}`, 20, 30);
         ctx.restore();
     }
 }
