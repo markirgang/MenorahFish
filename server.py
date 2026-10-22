@@ -224,19 +224,25 @@ def update_menorah_fish_background_loop():
             fish = menorah_fish_state["fish"]
             domes = menorah_fish_state["light_domes"]
 
-            # 1. Fish Neck Swing Logic (Gradual 3s Outstretched / Depower Sweep)
+            # 1. Fish Neck Swing Logic (L298 Ch B Forward Polarity with Thermal Overheat Protection)
             if is_speaking:
                 speak_stop_time = None
                 if speak_start_time is None:
                     speak_start_time = now
 
-                # Ramp UP neck position over 3 seconds (0.0 -> 1.0)
+                # Swing neck out to full extension (1.0) over 1.2 seconds
                 elapsed_speak = now - speak_start_time
-                target_pos = min(1.0, elapsed_speak / 3.0)
+                target_pos = min(1.0, elapsed_speak / 1.2)
                 fish["neck_position"] = target_pos
-                fish["neck_motor_pwm"] = int(target_pos * 100)
 
-                # Head spotlight bright & tail motor wagging during speech
+                # Thermal Protection: Once neck is fully extended, DEPOWER motor (0% PWM)
+                # to prevent continuous stall current & DC motor coil overheating while talking!
+                if target_pos >= 1.0:
+                    fish["neck_motor_pwm"] = 0
+                else:
+                    fish["neck_motor_pwm"] = int(target_pos * 100)
+
+                # Head spotlight bright & tail motor wagging (L298 Ch B Reverse Polarity) during speech
                 fish["head_spotlight"] = True
                 fish["tail_motor"] = True
 
@@ -258,15 +264,15 @@ def update_menorah_fish_background_loop():
                 if speak_stop_time is None:
                     speak_stop_time = now
 
-                # 1 second delay after talking ends, then ramp DOWN over 3 seconds (1.0 -> 0.0)
+                # Retract neck back to rest stance (0.0) and depower motor
                 elapsed_stop = now - speak_stop_time
-                if elapsed_stop < 1.0:
+                if elapsed_stop < 0.5:
                     target_pos = fish["neck_position"]
                 else:
-                    target_pos = max(0.0, 1.0 - ((elapsed_stop - 1.0) / 3.0))
+                    target_pos = max(0.0, 1.0 - ((elapsed_stop - 0.5) / 1.5))
 
                 fish["neck_position"] = target_pos
-                fish["neck_motor_pwm"] = int(target_pos * 100)
+                fish["neck_motor_pwm"] = 0  # Motor depowered to prevent thermal overheating
 
                 domes["breathing"] = False
                 domes["mouth_side_dome1"] = 100
@@ -275,7 +281,6 @@ def update_menorah_fish_background_loop():
                 domes["tail_side_dome2"]  = 100
 
                 # Idle behaviors when NOT speaking:
-                # Random tail wagging (~every 5 seconds) & occasional spotlight pulse
                 if random.random() < 0.08:
                     fish["tail_motor"] = random.choice([True, False])
                 else:
@@ -672,12 +677,13 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
 """
 Animatronic Menorah Fish & Candle Lighting Robot Arm Master Hardware Driver
 Single L298N Motor Driver Configurations:
-- Channel A (Fish Mouth DC Motor):
+- Channel 1 / Channel A (Fish Mouth DC Motor for Lipsync):
     * ENA = GPIO 18 (PWM), IN1 = GPIO 23, IN2 = GPIO 24
-- Channel B (Fish Body & Tail DC Motors):
+    * Forward Polarity (IN1=HIGH, IN2=LOW): Opens & closes fish mouth in sync with speech
+- Channel 2 / Channel B (Fish Neck Swing & Tail Wag Motors):
     * ENB = GPIO 19 (PWM), IN3 = GPIO 25, IN4 = GPIO 8
-    * Forward Polarity (IN3=HIGH, IN4=LOW): Gradually swings Fish Body out (PWM 0% -> 100% over 3s)
-    * Reverse Polarity (IN3=LOW, IN4=HIGH): Wags Fish Tail
+    * Forward Polarity (IN3=HIGH, IN4=LOW): Swings Neck out (PWM 0% -> 100% over 1.2s, then DEPOWERED to 0% to prevent thermal overheating)
+    * Reverse Polarity (IN3=LOW, IN4=HIGH): Drives Tail motor for wagging
 - PCA9685 16-Channel PWM Servo Controller (Robot Arm Joints 1-5, Stage Servos & Dreidels, Spotlights, Domes)
 """
 import time
@@ -685,11 +691,11 @@ import RPi.GPIO as GPIO
 from adafruit_pca9685 import PCA9685
 import board, busio
 
-L298_ENA = 18  # Channel A PWM (Fish Mouth)
+L298_ENA = 18  # Channel 1 PWM (Fish Mouth)
 L298_IN1 = 23  # Direction IN1
 L298_IN2 = 24  # Direction IN2
 
-L298_ENB = 19  # Channel B PWM (Fish Body & Tail)
+L298_ENB = 19  # Channel 2 PWM (Fish Neck & Tail)
 L298_IN3 = 25  # Direction IN3
 L298_IN4 = 8   # Direction IN4
 
@@ -702,46 +708,40 @@ pwm_body_tail = GPIO.PWM(L298_ENB, 1000)
 pwm_mouth.start(0)
 pwm_body_tail.start(0)
 
-def swing_fish_body_outstretched(duration_sec=3.0):
-    """Channel B Forward Polarity: Ramps PWM 0% -> 100% over 3s to swing body out."""
+def swing_fish_neck_outstretched(duration_sec=1.2):
+    """Channel 2 Forward Polarity: Swings neck out, then DEPOWERS motor (0% PWM) to prevent thermal overheating."""
     GPIO.output(L298_IN3, GPIO.HIGH)
     GPIO.output(L298_IN4, GPIO.LOW)
-    steps = 30
+    steps = 15
     for i in range(1, steps + 1):
         duty = int((i / steps) * 100)
         pwm_body_tail.ChangeDutyCycle(duty)
         time.sleep(duration_sec / steps)
-
-def depower_fish_body(duration_sec=3.0):
-    """Channel B Forward Polarity: Ramps PWM 100% -> 0% over 3s back to rest."""
-    steps = 30
-    for i in range(steps, -1, -1):
-        duty = int((i / steps) * 100)
-        pwm_body_tail.ChangeDutyCycle(duty)
-        time.sleep(duration_sec / steps)
+    # DEPOWER MOTOR AFTER EXTENSION TO PREVENT OVERHEATING WHILE TALKING:
+    pwm_body_tail.ChangeDutyCycle(0)
     GPIO.output(L298_IN3, GPIO.LOW)
     GPIO.output(L298_IN4, GPIO.LOW)
 
 def wag_fish_tail_reverse_polarity(active=True):
-    """Channel B Reverse Polarity: Drives tail motor."""
+    """Channel 2 Reverse Polarity: Drives tail motor for tail wagging."""
     if active:
         GPIO.output(L298_IN3, GPIO.LOW)
         GPIO.output(L298_IN4, GPIO.HIGH)
         pwm_body_tail.ChangeDutyCycle(80)
     else:
         pwm_body_tail.ChangeDutyCycle(0)
+        GPIO.output(L298_IN3, GPIO.LOW)
+        GPIO.output(L298_IN4, GPIO.LOW)
 
 def main():
     print("Menorah Fish L298N Master Motor Driver Online.")
-    print("Testing Fish Body 3s PWM Ramp Outward Swing...")
-    swing_fish_body_outstretched(3.0)
-    time.sleep(1.5)
-    print("Testing Fish Tail Reverse Polarity Wag...")
+    print("Testing Fish Neck Swing (Channel 2 Forward Polarity + Thermal Cutoff)...")
+    swing_fish_neck_outstretched(1.2)
+    time.sleep(1.0)
+    print("Testing Fish Tail Wag (Channel 2 Reverse Polarity)...")
     wag_fish_tail_reverse_polarity(True)
     time.sleep(1.0)
     wag_fish_tail_reverse_polarity(False)
-    print("Depowering Fish Body 3s Ramp Back to Rest...")
-    depower_fish_body(3.0)
 
 if __name__ == "__main__":
     try: main()
