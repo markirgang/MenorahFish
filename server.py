@@ -396,8 +396,9 @@ def execute_light_menorah_candles_sequence(count):
     with state_lock:
         menorah_fish_state["menorah"]["candles"][4] = True
 
-    arc_angles = [-80, -60, -40, -20, 0, 20, 40, 60, 80]
-    side_order = [3, 5, 2, 6, 1, 7, 0, 8] # Light inner to outer candles
+    # 8 Side Menorah Candles Arc Angles (Center Shamash Candle is held in the Robot Arm Claw!)
+    arc_angles = [-80, -60, -40, -20, 20, 40, 60, 80]
+    side_order = [3, 4, 2, 5, 1, 6, 0, 7] # Light inner to outer side candles
     target_indices = [side_order[i] for i in range(min(count, 8))]
 
     for idx in target_indices:
@@ -1099,7 +1100,7 @@ if __name__ == "__main__":
             ("4", "PCA9685 PWM Servo Driver", "16-Channel 12-Bit I2C Board (0x40)", "1", "Drives 6 Servos (Robot Arm J1-J5, Stage Servos & Dreidels)", "5V Logic / 5V-6V V+"),
             ("5", "L298N Dual H-Bridge Motor Driver", "Dual Channel DC Motor Controller", "1", "Ch 1: OEM Mouth Motor Fwd | Ch 2: OEM Neck Motor Fwd / Tail Motor Rev", "5V - 6V DC Motor Power"),
             ("6", "Solid State Relays (SSRs)", "3.3V DC Trigger / 120VAC Output SSRs", "10", "Controls 10 120VAC Candle Bulbs (8 Side + 1 Shamash + 1 Claw Candle)", "3.3V DC Trigger / 120VAC Line"),
-            ("7", "MOSFET Power Switch Modules", "IRF520 / D4184 MOSFET Boards", "4", "PWM Dimmer for 4 Stage Light Domes & 3 Tall Pole Spotlights", "3.3V DC PWM / 12V DC Stage"),
+            ("7", "IRLZ44N Logic-Level MOSFETs", "Discrete TO-220 N-Ch MOSFETs with 220Ω Gate Resistor & 22kΩ GND Pull-Down", "7", "PWM Dimmer for 4 Stage Light Domes & 3 Tall Pole Spotlights", "3.3V DC PWM Gate / 12V DC Load"),
             ("8", "High-Torque Metal Servos", "MG996R / SG90 Digital Servos", "6", "Robot Arm Joint Servos & Stage Servo Drives for Spinning Dreidels", "5V - 6V DC"),
             ("9", "120VAC Menorah Candle Bulbs", "E12 / C7 Electric Candle Bulbs & Sockets", "10", "8 Menorah Side Candles + 1 Center Shamash Candle + 1 Claw Candle", "120VAC Line Voltage"),
             ("10", "Stage Light Domes", "Frosted Glass RGB/Cyan Light Domes", "4", "2 Mouth-Side & 2 Tail-Side Dimmable Domes (Breathing/Chases)", "12V DC / MOSFET Gate"),

@@ -614,12 +614,12 @@ class MenorahFish3D {
         this.stageRoot.add(this.menorahGroup);
 
         this.candleObjs = [];
-        const arcAngles = [-80, -60, -40, -20, 0, 20, 40, 60, 80];
+        // 8 Side Menorah Candles arranged in a 180° Arc (Center Shamash Candle is held in the Robot Arm Claw!)
+        const arcAngles = [-80, -60, -40, -20, 20, 40, 60, 80];
         const arcRadius = 150;
 
         arcAngles.forEach((deg, idx) => {
             const rad = deg * (Math.PI / 180);
-            const isShamash = (idx === 4);
             const x = Math.sin(rad) * arcRadius;
             const z = Math.cos(rad) * arcRadius;
 
@@ -627,7 +627,7 @@ class MenorahFish3D {
             candleGroup.position.set(x, 0, z);
             this.menorahGroup.add(candleGroup);
 
-            const hHeight = isShamash ? 45 : 30;
+            const hHeight = 30;
             const holderMesh = new THREE.Mesh(
                 new THREE.CylinderGeometry(5, 7, hHeight, 16),
                 new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8, roughness: 0.2 })
@@ -635,7 +635,7 @@ class MenorahFish3D {
             holderMesh.position.y = hHeight / 2;
             candleGroup.add(holderMesh);
 
-            const cHeight = isShamash ? 40 : 30;
+            const cHeight = 30;
             const candleMesh = new THREE.Mesh(
                 new THREE.CylinderGeometry(3.5, 3.5, cHeight, 16),
                 new THREE.MeshStandardMaterial({ color: 0xfffdf0, roughness: 0.3 })
@@ -654,7 +654,7 @@ class MenorahFish3D {
             candleLight.position.y = hHeight + cHeight + 5;
             candleGroup.add(candleLight);
 
-            this.candleObjs.push({ group: candleGroup, flameMesh: flameMesh, flameMat: flameMat, candleLight: candleLight, isShamash: isShamash });
+            this.candleObjs.push({ group: candleGroup, flameMesh: flameMesh, flameMat: flameMat, candleLight: candleLight });
         });
     }
 
@@ -870,15 +870,14 @@ class MenorahFish3D {
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // 180° Menorah Candle Arc
-        const arcAngles = [-80, -60, -40, -20, 0, 20, 40, 60, 80];
+        // 8 Side Menorah Candles arranged in 180° Arc (Center Shamash Candle is held in Robot Arm Claw!)
+        const arcAngles = [-80, -60, -40, -20, 20, 40, 60, 80];
         const menorah = this.state.menorah || {};
         const candles = menorah.candles || [];
 
         arcAngles.forEach((deg, idx) => {
             const rad = (deg - 90) * (Math.PI / 180);
-            const isShamash = (idx === 4);
-            const r = isShamash ? 180 : 160;
+            const r = 160;
             const candX = cx + Math.cos(rad) * r;
             const candY = cy + 40 + Math.sin(rad) * (r * 0.35);
 
@@ -886,21 +885,21 @@ class MenorahFish3D {
 
             // Candle Stand
             ctx.fillStyle = '#ffd700';
-            ctx.fillRect(candX - 4, candY - (isShamash ? 25 : 18), 8, (isShamash ? 25 : 18));
+            ctx.fillRect(candX - 4, candY - 18, 8, 18);
 
             // Candle Body
             ctx.fillStyle = '#fffae6';
-            ctx.fillRect(candX - 3, candY - (isShamash ? 45 : 33), 6, 20);
+            ctx.fillRect(candX - 3, candY - 38, 6, 20);
 
             // Candle Flame
             if (isLit) {
                 const flicker = 1 + Math.sin(time * 15 + idx) * 0.25;
                 ctx.beginPath();
-                ctx.arc(candX, candY - (isShamash ? 49 : 37), 6 * flicker, 0, Math.PI * 2);
+                ctx.arc(candX, candY - 42, 6 * flicker, 0, Math.PI * 2);
                 ctx.fillStyle = '#ff5500';
                 ctx.fill();
                 ctx.beginPath();
-                ctx.arc(candX, candY - (isShamash ? 49 : 37), 3 * flicker, 0, Math.PI * 2);
+                ctx.arc(candX, candY - 42, 3 * flicker, 0, Math.PI * 2);
                 ctx.fillStyle = '#ffd700';
                 ctx.fill();
             }

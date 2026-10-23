@@ -99,17 +99,17 @@ This document details all physical hardware connections, Raspberry Pi GPIO pin m
 
 ---
 
-## ⚡ 3. IRLZ44N MOSFET LIGHTING CIRCUIT SCHEMATIC (GEMINI AI SPECIFICATION)
+## ⚡ 3. DISCRETE IRLZ44N MOSFET LIGHTING CIRCUIT SCHEMATIC
 
 ```
-        Raspberry Pi GPIO Pin (e.g. GPIO 12 / 16 / 20 / 21)
+        Raspberry Pi GPIO Pin (e.g. GPIO 4 / 12 / 7 / 1 / 16 / 20 / 21)
                                 |
                                 |
                              [220Ω Series Gate Resistor]
                                 |
                                 +-------------------+
                                 |                   |
-                          (Gate - Pin 1)     [10kΩ Pull-Down]
+                          (Gate - Pin 1)     [22kΩ Pull-Down]
                           IRLZ44N MOSFET           |
                          +--------------+           |
                          |  G    D    S |           |
@@ -122,7 +122,7 @@ This document details all physical hardware connections, Raspberry Pi GPIO pin m
                      12V Light (+) Positive Wire --------> +12V DC Power Supply (+) Rail
 ```
 
-- **Gate (Pin 1):** Connected directly from Pi GPIO pin through a **220Ω series resistor** (protects GPIO from inrush current) and a **10kΩ pull-down resistor** to GND (prevents gate float & flickering on bootup).
+- **Gate (Pin 1):** Connected directly from Pi GPIO pin through a **220Ω series gate resistor** (protects GPIO from inrush current) and a **22kΩ pull-down resistor to GND** (prevents floating gate & flickering on bootup).
 - **Drain (Pin 2):** Connected to the **Negative (-) load wire** of the 12V DC Stage Spotlight or Light Dome.
 - **Source (Pin 3):** Connected directly to **Common Ground (GND)** (shared between 12V Power Supply (-) and Raspberry Pi GND).
 - **Light Load (+):** Positive (+) wire of 12V Light connects directly to **+12V DC Power Supply (+)**.
