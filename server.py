@@ -404,33 +404,38 @@ def execute_light_menorah_candles_sequence(count):
     for idx in target_indices:
         target_angle = arc_angles[idx]
 
-        # Step 1: Rotate shoulder/base J1 to align arm with target candle
+        # Step 1: Rotate shoulder/base J1 smoothly to align arm over target candle (1.5s)
         with state_lock:
             menorah_fish_state["robot_arm"]["j1_base"] = target_angle
             menorah_fish_state["robot_arm"]["j2_shoulder"] = 35
             menorah_fish_state["robot_arm"]["j3_elbow"] = 25
             menorah_fish_state["robot_arm"]["j4_wrist"] = 0
 
-        time.sleep(0.6)
+        time.sleep(1.5)
 
         # Step 2: Coordinate Shoulder (J2), Elbow (J3), and Wrist (J4) TOGETHER
-        # to lower the claw candle flame tip directly onto the top bulb of the menorah candle!
+        # to lower the claw candle flame tip directly onto the top bulb of the menorah candle (1.0s)
         with state_lock:
             menorah_fish_state["robot_arm"]["j2_shoulder"] = 55
             menorah_fish_state["robot_arm"]["j3_elbow"] = -35
             menorah_fish_state["robot_arm"]["j4_wrist"] = -25
-            # Light the candle bulb!
+
+        time.sleep(1.0)
+
+        # Step 3: Ignite candle & HOLD flame touching candle top for 4.5 seconds
+        # (Takes ~7-8 seconds total per candle, giving a realistic deliberate lighting ceremony!)
+        with state_lock:
             menorah_fish_state["menorah"]["candles"][idx] = True
 
-        time.sleep(0.8) # Hold flame touching candle top to make it look like it lights it!
+        time.sleep(4.5)
 
-        # Step 3: Return Wrist (J4), Elbow (J3), and Shoulder (J2) back to rest stance TOGETHER
+        # Step 4: Return Wrist (J4), Elbow (J3), and Shoulder (J2) back to rest stance TOGETHER (1.5s)
         with state_lock:
             menorah_fish_state["robot_arm"]["j4_wrist"] = 0
             menorah_fish_state["robot_arm"]["j3_elbow"] = 45
             menorah_fish_state["robot_arm"]["j2_shoulder"] = 30
 
-        time.sleep(0.5)
+        time.sleep(1.5)
 
     # Step 4: Park arm at rest stance after lighting last candle
     execute_arm_rest_position()
@@ -1128,6 +1133,27 @@ if __name__ == "__main__":
             ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.HexColor('#ffffff'), colors.HexColor('#f8fafd')])
         ]))
         story.append(t_bom)
+
+        # --- PAGE 4: OPERATING INSTRUCTIONS, ASSEMBLY GUIDE & SAFETY MANUAL ---
+        story.append(PageBreak())
+        story.append(Paragraph("📖 OPERATING INSTRUCTIONS, ASSEMBLY GUIDE & POWER SAFETY RULES", title_style))
+        story.append(Paragraph("Page 4 of 4: Comprehensive Operating Manual, Robot Arm Kinematics, Gemini AI Setup & Electrical Safety Rules", subtitle_style))
+        story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#0055a5'), spaceBefore=2, spaceAfter=8))
+
+        guide_style = ParagraphStyle('GuideText', parent=styles['Normal'], fontName='Helvetica', fontSize=8, leading=11, textColor=colors.HexColor('#111111'), spaceAfter=6)
+
+        story.append(Paragraph("⚡ 1. Power Supply & Electrical Wiring Safety Rules", heading_style))
+        story.append(Paragraph("<b>• Common Reference Ground Rail:</b> You MUST connect the GND pins of the Raspberry Pi, PCA9685, L298N motor driver, MOSFET source terminals, and 12V/5V DC power supplies together to a shared common ground bus.", guide_style))
+        story.append(Paragraph("<b>• 120VAC High-Voltage SSR Safety:</b> Each of the 10 120VAC Menorah candle sockets is switched by an individual 3.3V DC input Solid State Relay (SSR). Ensure all 120VAC connections are properly insulated inside an IP65 enclosure and protected with a 5A inline fuse.", guide_style))
+        story.append(Paragraph("<b>• Discrete IRLZ44N MOSFET Wiring:</b> Connect each Pi GPIO PWM pin through a <b>220Ω series resistor</b> to the MOSFET Gate (Pin 1) to protect the Pi pin from inrush current. Connect a <b>22kΩ pull-down resistor</b> from Gate to GND to prevent flickering during Pi bootup. Connect 12V DC Light (-) to Drain (Pin 2) and Source (Pin 3) to Common GND.", guide_style))
+
+        story.append(Paragraph("🦾 2. Robot Arm Kinematics & Candle Lighting Procedure", heading_style))
+        story.append(Paragraph("<b>• Coordinated Kinematic Lighting Motion:</b> When a candle lighting command is triggered, the arm base (J1) rotates to the target candle's arc angle. Shoulder (J2), Elbow (J3), and Wrist (J4) coordinate together to lower the claw's flickering flame directly onto the top bulb of the menorah candle and hold it touching for 4.5s (taking 7-8 seconds total per candle). The arm then lifts back to clearance position before moving to the next candle or parking at rest stance.", guide_style))
+        story.append(Paragraph("<b>• Standby Park Position & Gestures:</b> Use quick action buttons or voice commands to trigger <i>Rest Position</i> (Home stance), <i>High Five</i>, <i>Nod Yes</i>, or <i>Shake No</i>.", guide_style))
+
+        story.append(Paragraph("🎙️ 3. Animatronic Fish Lipsync & Gemini Voice AI Setup", heading_style))
+        story.append(Paragraph("<b>• Animatronic OEM Motor Control:</b> L298 Channel 1 (Forward Polarity) opens the lower jaw in sync with speech/song. L298 Channel 2 (Forward Polarity) extends the neck out 75° while talking. When speech finishes, Channel 2 depowers, allowing the OEM return spring to pull the neck flat against the plaque.", guide_style))
+        story.append(Paragraph("<b>• Gemini Multimodal AI:</b> Provide a valid Gemini API Key in the System Configuration tab to enable live speech processing, vision camera analysis, and automated Hanukkah show responses.", guide_style))
 
         doc.build(story)
         return buffer.getvalue()
