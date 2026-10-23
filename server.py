@@ -198,13 +198,20 @@ menorah_fish_state = {
         "candles": [False] * 9      # Array of 9 booleans (Index 4 is Center Shamash)
     },
 
-    # 4 Stage Light Domes (Breathing light sequence while fish talks/sings):
+    # 4 Stage Light Domes (Individual IRLZ44N MOSFETs & Pi GPIOs):
     "light_domes": {
         "breathing": False,
-        "mouth_side_dome1": 100,    # Intensity 0-100%
-        "mouth_side_dome2": 100,
-        "tail_side_dome1": 100,
-        "tail_side_dome2": 100
+        "mouth_side_dome1": 100,    # GPIO 4 (Pin 7) -> IRLZ44N MOSFET PWM (0-100%)
+        "mouth_side_dome2": 100,    # GPIO 12 (Pin 32) -> IRLZ44N MOSFET PWM (0-100%)
+        "tail_side_dome1": 100,     # GPIO 7 (Pin 26) -> IRLZ44N MOSFET PWM (0-100%)
+        "tail_side_dome2": 100      # GPIO 1 (Pin 28) -> IRLZ44N MOSFET PWM (0-100%)
+    },
+
+    # 3 Stage Spotlights (Individual IRLZ44N MOSFETs & Pi GPIOs):
+    "spotlights": {
+        "fish_spot": 100,           # GPIO 16 (Pin 36) -> IRLZ44N MOSFET PWM (0-100%)
+        "left_spot": 100,           # GPIO 20 (Pin 38) -> IRLZ44N MOSFET PWM (0-100%)
+        "right_spot": 100           # GPIO 21 (Pin 40) -> IRLZ44N MOSFET PWM (0-100%)
     }
 }
 
@@ -582,7 +589,6 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "device": "Animatronic Menorah Fish & Robot Arm Controller",
                 "i2c_bus": {"sda": "GPIO 2 (Pin 3)", "scl": "GPIO 3 (Pin 5)", "pca9685_address": "0x40"},
                 "120vac_ssr_candles": {
-                    "claw_candle": "GPIO 4 (Pin 7) -> 3.3V DC SSR for 120VAC Claw Candle (Always ON)",
                     "shamash_candle": "GPIO 17 (Pin 11) -> 3.3V DC SSR for 120VAC Center Shamash Candle",
                     "side_candle_1": "GPIO 27 (Pin 13) -> 3.3V DC SSR for 120VAC Menorah Side Candle 1",
                     "side_candle_2": "GPIO 22 (Pin 15) -> 3.3V DC SSR for 120VAC Menorah Side Candle 2",
@@ -593,19 +599,24 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
                     "side_candle_7": "GPIO 6 (Pin 31) -> 3.3V DC SSR for 120VAC Menorah Side Candle 7",
                     "side_candle_8": "GPIO 13 (Pin 33) -> 3.3V DC SSR for 120VAC Menorah Side Candle 8"
                 },
-                "mosfet_pwm_lights": {
-                    "stage_light_domes": "GPIO 12 (Pin 32) -> MOSFET Gate (Breathing Pulse & Dancing Chase PWM)",
-                    "fish_mouth_spotlight": "GPIO 16 (Pin 36) -> MOSFET Gate (Fish Mouth Spotlight PWM)",
-                    "left_dreidel_spotlight": "GPIO 20 (Pin 38) -> MOSFET Gate (Left Dreidel Spotlight PWM)",
-                    "right_dreidel_spotlight": "GPIO 21 (Pin 40) -> MOSFET Gate (Right Dreidel Spotlight PWM)"
+                "individual_mosfet_lights": {
+                    "mouth_side_dome1": "GPIO 4 (Pin 7) -> IRLZ44N MOSFET Gate (220Ω / 10kΩ GND) -> 12V DC Dome Light 1",
+                    "mouth_side_dome2": "GPIO 12 (Pin 32) -> IRLZ44N MOSFET Gate (220Ω / 10kΩ GND) -> 12V DC Dome Light 2",
+                    "tail_side_dome1": "GPIO 7 (Pin 26) -> IRLZ44N MOSFET Gate (220Ω / 10kΩ GND) -> 12V DC Dome Light 3",
+                    "tail_side_dome2": "GPIO 1 (Pin 28) -> IRLZ44N MOSFET Gate (220Ω / 10kΩ GND) -> 12V DC Dome Light 4",
+                    "fish_mouth_spotlight": "GPIO 16 (Pin 36) -> IRLZ44N MOSFET Gate (220Ω / 10kΩ GND) -> 12V DC Middle Fish Spotlight",
+                    "left_dreidel_spotlight": "GPIO 20 (Pin 38) -> IRLZ44N MOSFET Gate (220Ω / 10kΩ GND) -> 12V DC Left Dreidel Spotlight",
+                    "right_dreidel_spotlight": "GPIO 21 (Pin 40) -> IRLZ44N MOSFET Gate (220Ω / 10kΩ GND) -> 12V DC Right Dreidel Spotlight"
                 },
-                "pca9685_channels": {
+                "pca9685_channels_servos_only": {
                     "0": "Robot Arm Joint 1 Base Yaw Servo (-90° to +90°)",
                     "1": "Robot Arm Joint 2 Shoulder Pitch Servo (-90° to +90°)",
                     "2": "Robot Arm Joint 3 Elbow Pitch Servo (-135° to +135°)",
                     "3": "Stage Servo 1 (Mouth-Side Servo & Spinning Dreidel)",
                     "4": "Stage Servo 2 (Tail-Side Servo & Spinning Dreidel)",
-                    "5": "Robot Arm Joint 4/5 Wrist Pitch & Gripper Claw Servo"
+                    "5": "Robot Arm Joint 4/5 Wrist Pitch & Gripper Claw Servo",
+                    "10": "Fish Head Spotlight Pan Servo",
+                    "11": "Fish Head Spotlight Tilt Servo"
                 },
                 "l298_driver": {
                     "ch1_mouth": "GPIO 18 ENA, GPIO 23 IN1, GPIO 24 IN2 (Forward Polarity OEM Mouth Motor)",
@@ -873,7 +884,7 @@ if __name__ == "__main__":
         overview_data = [
             [Paragraph("Module / Component", header_cell_style), Paragraph("Hardware Role & Signals", header_cell_style), Paragraph("Power Requirements", header_cell_style)],
             [Paragraph("<b>Raspberry Pi 4 / 5</b>", cell_style), Paragraph("Executes master server, Gemini AI, I2C bus (Pin 3 SDA, Pin 5 SCL), SSR Triggers, MOSFET PWM & L298N drivers", cell_style), Paragraph("+5V @ 3A DC", cell_style)],
-            [Paragraph("<b>PCA9685 16-Ch PWM Driver</b>", cell_style), Paragraph("I2C Address 0x40. Drives 16 PWM channels (5-DOF Robot Arm, Stage Servos & Spinning Dreidels)", cell_style), Paragraph("+5V Logic / +5V-+6V 12A V+", cell_style)],
+            [Paragraph("<b>PCA9685 16-Ch PWM Driver</b>", cell_style), Paragraph("I2C Address 0x40. Drives 16 PWM channels (5-DOF Robot Arm, Stage Servos & Spinning Dreidels)", cell_style), Paragraph("3.3V DC Logic VCC / +5V-+6V 12A V+", cell_style)],
             [Paragraph("<b>Single L298N Motor Driver</b>", cell_style), Paragraph("Ch 1: OEM Mouth DC Motor (Forward Polarity). Ch 2: OEM Neck Motor (Fwd Polarity) & OEM Tail Motor (Rev Polarity)", cell_style), Paragraph("+5V/+6V High-Current Rail", cell_style)],
             [Paragraph("<b>120VAC Solid State Relays (10x)</b>", cell_style), Paragraph("10x 3.3V DC Triggered SSRs for 8 Menorah Side Candles, 1 Shamash Candle, and 1 Claw Candle", cell_style), Paragraph("3.3V DC Logic / 120VAC Line", cell_style)],
             [Paragraph("<b>MOSFET Power Transistors (4x)</b>", cell_style), Paragraph("4x MOSFET Gate Switches for Dimmable 4 Stage Domes (Breathing/Chases) & 3 Pole Spotlights", cell_style), Paragraph("3.3V DC PWM / 12V Stage Power", cell_style)]
@@ -1030,7 +1041,7 @@ if __name__ == "__main__":
         ]]
 
         pca_items = [
-            ("I2C Header", "SDA / SCL / VCC / GND", "Raspberry Pi GPIO 2 & 3", "I2C Serial Communication Bus (Addr: 0x40)", "3.3V / 5V Logic"),
+            ("I2C Header", "SDA / SCL / VCC / GND", "Raspberry Pi GPIO 2, 3 & 3.3V Pin 1", "I2C Serial Communication Bus (Addr: 0x40)", "3.3V DC VCC Logic"),
             ("Ext Power V+", "V+ Screw Terminal", "5V / 6V 12A Power Supply", "High-Current Servo Power Rail", "5V - 6V DC @ 12A"),
             ("Channel 0", "PWM Servo Out", "Robot Arm Joint 1 Base", "Base Rotation Servo (-90° to +90°)", "5V Servo Power"),
             ("Channel 1", "PWM Servo Out", "Robot Arm Joint 2 Shoulder", "Shoulder Pitch Servo (-90° to +90°)", "5V Servo Power"),
