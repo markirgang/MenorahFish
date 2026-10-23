@@ -589,6 +589,7 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
                 "device": "Animatronic Menorah Fish & Robot Arm Controller",
                 "i2c_bus": {"sda": "GPIO 2 (Pin 3)", "scl": "GPIO 3 (Pin 5)", "pca9685_address": "0x40"},
                 "120vac_ssr_candles": {
+                    "claw_candle": "GPIO 4 (Pin 7) -> 3.3V DC SSR for 120VAC Claw Candle (Always ON)",
                     "shamash_candle": "GPIO 17 (Pin 11) -> 3.3V DC SSR for 120VAC Center Shamash Candle",
                     "side_candle_1": "GPIO 27 (Pin 13) -> 3.3V DC SSR for 120VAC Menorah Side Candle 1",
                     "side_candle_2": "GPIO 22 (Pin 15) -> 3.3V DC SSR for 120VAC Menorah Side Candle 2",
