@@ -11,10 +11,10 @@ Raspberry Pi 4/5,Pin 23,GPIO 11,Yellow,Menorah Side Candle 5 120VAC SSR,DC Input
 Raspberry Pi 4/5,Pin 29,GPIO 5,Yellow,Menorah Side Candle 6 120VAC SSR,DC Input Terminal,3.3V DC Solid State Relay for 120VAC Side Candle 6
 Raspberry Pi 4/5,Pin 31,GPIO 6,Yellow,Menorah Side Candle 7 120VAC SSR,DC Input Terminal,3.3V DC Solid State Relay for 120VAC Side Candle 7
 Raspberry Pi 4/5,Pin 33,GPIO 13,Yellow,Menorah Side Candle 8 120VAC SSR,DC Input Terminal,3.3V DC Solid State Relay for 120VAC Side Candle 8
-Raspberry Pi 4/5,Pin 32,GPIO 12 (PWM),Purple,4 Stage Light Domes MOSFET,Gate Terminal,MOSFET Power Switch / PWM Dimmer for 4 Stage Light Domes
-Raspberry Pi 4/5,Pin 36,GPIO 16 (PWM),Cyan,Fish Mouth Spotlight MOSFET,Gate Terminal,MOSFET Power Switch / PWM Dimmer for Fish Spotlight
-Raspberry Pi 4/5,Pin 38,GPIO 20 (PWM),Cyan,Left Dreidel Spotlight MOSFET,Gate Terminal,MOSFET Power Switch / PWM Dimmer for Left Dreidel Spotlight
-Raspberry Pi 4/5,Pin 40,GPIO 21 (PWM),Cyan,Right Dreidel Spotlight MOSFET,Gate Terminal,MOSFET Power Switch / PWM Dimmer for Right Dreidel Spotlight
+Raspberry Pi 4/5,Pin 32,GPIO 12 (PWM),Purple,IRLZ44N MOSFET #1 (Domes),Gate Terminal via 220Ω (10kΩ GND),IRLZ44N Logic-Level MOSFET PWM Dimmer for 4 Stage Light Domes (12V DC)
+Raspberry Pi 4/5,Pin 36,GPIO 16 (PWM),Cyan,IRLZ44N MOSFET #2 (Fish Spot),Gate Terminal via 220Ω (10kΩ GND),IRLZ44N Logic-Level MOSFET PWM Dimmer for Fish Mouth Spotlight (12V DC)
+Raspberry Pi 4/5,Pin 38,GPIO 20 (PWM),Cyan,IRLZ44N MOSFET #3 (Left Spot),Gate Terminal via 220Ω (10kΩ GND),IRLZ44N Logic-Level MOSFET PWM Dimmer for Left Dreidel Spotlight (12V DC)
+Raspberry Pi 4/5,Pin 40,GPIO 21 (PWM),Cyan,IRLZ44N MOSFET #4 (Right Spot),Gate Terminal via 220Ω (10kΩ GND),IRLZ44N Logic-Level MOSFET PWM Dimmer for Right Dreidel Spotlight (12V DC)
 Raspberry Pi 4/5,Pin 12,GPIO 18 (PWM),Magenta,L298N Motor Driver,ENA Terminal,Channel 1: Fish Mouth OEM DC Motor Speed PWM
 Raspberry Pi 4/5,Pin 16,GPIO 23,Blue,L298N Motor Driver,IN1 Terminal,Channel 1: Fish Mouth Direction 1 (Forward Polarity Lipsync)
 Raspberry Pi 4/5,Pin 18,GPIO 24,Blue,L298N Motor Driver,IN2 Terminal,Channel 1: Fish Mouth Direction 2 (Forward Polarity Lipsync)
@@ -27,6 +27,9 @@ PCA9685 PWM Driver,Channel 2,PWM Servo Out,Red,Robot Arm Joint 3,Elbow Servo,Rob
 PCA9685 PWM Driver,Channel 3,PWM Servo Out,Gold,Stage Servo 1,Mouth-Side Servo & Dreidel,Sweeps Mouth-Side Servo & Spinning Dreidel on Stage
 PCA9685 PWM Driver,Channel 4,PWM Servo Out,Gold,Stage Servo 2,Tail-Side Servo & Dreidel,Sweeps Tail-Side Servo & Spinning Dreidel on Stage
 PCA9685 PWM Driver,Channel 5,PWM Servo Out,Magenta,Robot Arm Joint 4/5,Wrist & Claw,Robot Arm Wrist & Gripper Candle Claw
+PCA9685 PWM Driver,Channel 10,PWM Servo Out,Cyan,Fish Head Spotlight,Pan Servo,Fish Head Spotlight Horizontal Pan Servo
+PCA9685 PWM Driver,Channel 11,PWM Servo Out,Cyan,Fish Head Spotlight,Tilt Servo,Fish Head Spotlight Vertical Tilt Servo
 Power Rail,120VAC Line,High Voltage AC,Orange,Solid State Relays,AC Terminals,120VAC Power Rail for Menorah Candles & Claw Candle
+Power Rail,+12V DC,High Current DC,Red,IRLZ44N MOSFET Loads,12V DC Light (+),12V DC High-Current Power Rail for Stage Lights
 Power Rail,+5V / +6V,DC Power Rail,Red,PCA9685 V+ & L298N Power,Screw Terminals,High-Current 12A Power Supply for Servos and Motors
 Power Rail,GND Bus,Common Ground,Black,All Boards & Pi GND,Ground Bus,Shared Common Reference Ground Bus across all Modules
