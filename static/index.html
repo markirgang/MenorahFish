@@ -631,6 +631,7 @@ body {
             <button class="nav-tab-btn" id="tabBtnWiring" data-tab="tabWiring" onclick="switchTab('tabWiring')">🛠️ Hardware & Wiring Diagrams</button>
             <button class="nav-tab-btn" id="tabBtnCalib" data-tab="tabCalib" onclick="switchTab('tabCalib')">🔧 Servo Calibration & Hardware Output Tests</button>
             <button class="nav-tab-btn" id="tabBtnConfig" data-tab="tabConfig" onclick="switchTab('tabConfig')">⚙️ System Configuration (Camera, Mic, Audio & Voice)</button>
+            <button class="nav-tab-btn" id="tabBtnInstructions" data-tab="tabInstructions" onclick="switchTab('tabInstructions')">📖 Guide & Instructions</button>
         </nav>
 
         <!-- Tab 1: Main Stage & Show Controls Pane -->
@@ -1504,6 +1505,98 @@ body {
 
             <div style="text-align: right; margin-top: 15px;">
                 <button class="btn-export" id="btnSaveConfig" style="padding: 12px 28px; font-size: 1rem; background: linear-gradient(135deg, var(--accent-green), #00cc66); color: #000;">💾 Save & Apply All Settings</button>
+            </div>
+        </div>
+
+        <!-- Tab 5: Guide & Operating Manual Pane -->
+        <div id="tabInstructions" class="tab-pane" style="display: none;">
+            <div class="sync-switch-card" style="border-color: var(--accent-cyan); background: linear-gradient(135deg, #101a33, #080f22); margin-bottom: 20px;">
+                <div class="card-header" style="border:none;">
+                    <div>
+                        <h3 style="color: var(--accent-cyan); font-size: 1.3rem;">📖 ANIMATRONIC MENORAH FISH & CANDLE ROBOT ARM OPERATING MANUAL</h3>
+                        <span class="sync-switch-info">Complete guide for show stage operation, menorah candle lighting routines, 5-DOF robot arm controls, and Gemini AI voice/vision integration.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:20px;">
+                <!-- Step 1 -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="card-badge" style="background:var(--accent-cyan); color:#000; font-weight:bold;">Step 1</span>
+                        <h3 style="color:var(--accent-yellow);">🕎 Hanukkah Menorah Show & Candle Lighting</h3>
+                    </div>
+                    <ul style="color:var(--text-muted); font-size:0.88rem; line-height:1.7; padding-left:18px;">
+                        <li><strong>Quick Candle Lighting:</strong> Click any button (1 through 8 Candles) in the <em style="color:#fff;">Candle Lighting Selector</em> card.</li>
+                        <li><strong>Autonomous Sequence:</strong> The 5-DOF robot arm automatically positions its claw candle to extinguish existing flames and light the selected side candles alongside the central Shamash!</li>
+                        <li><strong>Extinguish All:</strong> Click <strong style="color:var(--accent-red);">🛑 Extinguish All</strong> to turn off all menorah side flames.</li>
+                    </ul>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="card-badge" style="background:var(--accent-cyan); color:#000; font-weight:bold;">Step 2</span>
+                        <h3 style="color:var(--accent-cyan);">👄 Animatronic Fish & Lipsync Mechanics</h3>
+                    </div>
+                    <ul style="color:var(--text-muted); font-size:0.88rem; line-height:1.7; padding-left:18px;">
+                        <li><strong>L298 Ch A (Mouth DC Motor):</strong> Drives the realistic opening mouth mechanism synchronized to vocal audio frequencies.</li>
+                        <li><strong>L298 Ch B (Neck Swing Motor):</strong> Triggers a 3-second outstretched neck swing motion during peak song moments.</li>
+                        <li><strong>Tail Wag & Spotlights:</strong> Controls reverse polarity tail wagging and stage spotlight dreidel servos.</li>
+                    </ul>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="card-badge" style="background:var(--accent-cyan); color:#000; font-weight:bold;">Step 3</span>
+                        <h3 style="color:var(--accent-magenta);">🦾 5-DOF Robot Arm Manual Control</h3>
+                    </div>
+                    <ul style="color:var(--text-muted); font-size:0.88rem; line-height:1.7; padding-left:18px;">
+                        <li><strong>Joint Sliders:</strong> Manually adjust Base Yaw (J1: -90° to +90°), Shoulder (J2), Elbow (J3), Wrist (J4), and Gripper Claw (J5).</li>
+                        <li><strong>Quick Gestures:</strong> Trigger preset arm motions including <em>Rest Position 🏠</em>, <em>High Five ✋</em>, <em>Nod Yes 👍</em>, and <em>Shake No 👎</em>.</li>
+                        <li><strong>Claw Flame:</strong> Toggle the flickering LED flame on the arm's claw candle.</li>
+                    </ul>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="card-badge" style="background:var(--accent-cyan); color:#000; font-weight:bold;">Step 4</span>
+                        <h3 style="color:var(--accent-green);">🎙️ Gemini AI Voice, Mic & Multimodal Vision</h3>
+                    </div>
+                    <ul style="color:var(--text-muted); font-size:0.88rem; line-height:1.7; padding-left:18px;">
+                        <li><strong>Live Mic:</strong> Click <strong style="color:var(--accent-green);">🎙️ Start Voice Mic</strong> to talk directly to the fish using web audio VU level metering.</li>
+                        <li><strong>Command Examples:</strong> Ask the fish: <em>"Light 4 candles"</em>, <em>"Tell a Hanukkah joke"</em>, or <em>"Sing a song"</em>.</li>
+                        <li><strong>Camera Feed:</strong> Select USB camera or Pi CSI camera feed to allow Gemini vision analysis of audience and surroundings.</li>
+                    </ul>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="card-badge" style="background:var(--accent-cyan); color:#000; font-weight:bold;">Step 5</span>
+                        <h3 style="color:var(--accent-yellow);">🎵 MP3 Playlist & Animatronic Lipsync</h3>
+                    </div>
+                    <ul style="color:var(--text-muted); font-size:0.88rem; line-height:1.7; padding-left:18px;">
+                        <li><strong>Upload MP3s:</strong> Use <strong style="color:var(--accent-magenta);">📁 Upload MP3</strong> to add local Hanukkah or custom music tracks to the playlist.</li>
+                        <li><strong>Web Audio Engine:</strong> Click <strong style="color:var(--accent-green);">▶️ Play & Sync</strong> to run live Web Audio FFT analysis that drives fish mouth actuation in realtime!</li>
+                        <li><strong>Lipsync Tuning:</strong> Adjust Vocal Lipsync Gain, Music Volume, and Tail Beat Sensitivity sliders.</li>
+                    </ul>
+                </div>
+
+                <!-- Step 6 -->
+                <div class="panel-card">
+                    <div class="card-header">
+                        <span class="card-badge" style="background:var(--accent-cyan); color:#000; font-weight:bold;">Step 6</span>
+                        <h3 style="color:var(--accent-purple);">🔧 Servo Calibration & Hardware Wiring</h3>
+                    </div>
+                    <ul style="color:var(--text-muted); font-size:0.88rem; line-height:1.7; padding-left:18px;">
+                        <li><strong>Wiring Tab:</strong> Review interactive SVG circuit schematics for Raspberry Pi GPIO, PCA9685 PWM driver (0x40), and L298N dual H-bridge motor connections.</li>
+                        <li><strong>Servo Trims:</strong> Switch to <strong style="color:var(--accent-cyan);">🔧 Servo Calibration</strong> view to fine-tune zero offset trims and save settings permanently.</li>
+                        <li><strong>Export PDF/CSV:</strong> Download schematic documentation or Python hardware control scripts using top header buttons.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
