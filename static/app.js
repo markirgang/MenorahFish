@@ -584,7 +584,7 @@ function startApp() {
             const devices = await navigator.mediaDevices.enumerateDevices();
 
             if (configMicSelect) {
-                configMicSelect.innerHTML = '<option value="default">Default System Microphone</option>';
+                configMicSelect.innerHTML = '<option value="browser" selected>🌐 Remote Computer / Browser Microphone (Client Web Mic)</option><option value="default">🎙️ Raspberry Pi Local Server Microphone (Default Mic)</option>';
                 devices.filter(d => d.kind === 'audioinput').forEach((dev, idx) => {
                     const opt = document.createElement('option');
                     opt.value = dev.deviceId;

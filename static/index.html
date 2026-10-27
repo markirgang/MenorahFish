@@ -1488,6 +1488,34 @@ body {
 
                 <div class="panel-card config-card">
                     <div class="card-header">
+                        <h3>🎙️ MICROPHONE INPUT SELECTION</h3>
+                        <span class="card-badge">Audio Input</span>
+                    </div>
+                    <div class="control-group">
+                        <label for="configMicSelect">Select Microphone Device:</label>
+                        <select id="configMicSelect" class="config-select">
+                            <option value="browser" selected>🌐 Remote Computer / Browser Microphone (Client Web Mic)</option>
+                            <option value="default">🎙️ Raspberry Pi Local Server Microphone (Default Mic)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-card config-card">
+                    <div class="card-header">
+                        <h3>🔊 AUDIO OUTPUT & SPEAKER SELECTION</h3>
+                        <span class="card-badge">Audio Output</span>
+                    </div>
+                    <div class="control-group">
+                        <label for="configAudioOutputSelect">Select Speaker / Audio Output Target:</label>
+                        <select id="configAudioOutputSelect" class="config-select">
+                            <option value="browser" selected>🌐 Remote Computer / Browser Audio (Client Web Audio)</option>
+                            <option value="default">🔊 Raspberry Pi Local Server Speaker (Default Audio)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="panel-card config-card">
+                    <div class="card-header">
                         <h3>🗣️ AI VOICE & ACCENT SELECTION</h3>
                         <span class="card-badge">Voice Synthesis</span>
                     </div>
