@@ -593,6 +593,7 @@ function startApp() {
                 });
             }
         } catch (e) {}
+        if (window.AudioOutputDevices) window.AudioOutputDevices.populate();
     }
 
     // --- 7. SERVO CALIBRATION & HARDWARE OUTPUT DIAGNOSTICS ---
