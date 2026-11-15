@@ -578,23 +578,10 @@ function startApp() {
     const configAudioOutputSelect = document.getElementById('configAudioOutputSelect');
 
     async function populateMediaDevices() {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) return;
-        try {
-            await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
-            const devices = await navigator.mediaDevices.enumerateDevices();
-
-            if (configMicSelect) {
-                configMicSelect.innerHTML = '<option value="browser" selected>🌐 Remote Computer / Browser Microphone (Client Web Mic)</option><option value="default">🎙️ Raspberry Pi Local Server Microphone (Default Mic)</option>';
-                devices.filter(d => d.kind === 'audioinput').forEach((dev, idx) => {
-                    const opt = document.createElement('option');
-                    opt.value = dev.deviceId;
-                    opt.textContent = dev.label || `Microphone ${idx + 1}`;
-                    configMicSelect.appendChild(opt);
-                });
-            }
-        } catch (e) {}
-        if (window.AudioOutputDevices) window.AudioOutputDevices.populate();
-    }
+        if (window.AudioHardware) {
+            window.AudioHardware.populate();
+            return;
+        }
 
     // --- 7. SERVO CALIBRATION & HARDWARE OUTPUT DIAGNOSTICS ---
     function adjustOffset(inputId, delta) {
