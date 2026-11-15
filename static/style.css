@@ -803,3 +803,33 @@ body {
 .btn-step:active {
     transform: scale(0.92);
 }
+
+
+/* Compact Tab Bar for Stage Show */
+.nav-tabs-bar {
+    display: flex !important;
+    gap: 3px !important;
+    margin-bottom: 8px !important;
+    padding: 2px 4px !important;
+    background: rgba(19, 24, 43, 0.7) !important;
+    border: 1px solid var(--card-border, rgba(255,255,255,0.1)) !important;
+    border-radius: 8px !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    align-items: center !important;
+}
+.nav-tabs-bar::-webkit-scrollbar {
+    display: none !important;
+}
+
+.nav-tab-btn {
+    flex: 0 0 auto !important;
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.2px !important;
+}
