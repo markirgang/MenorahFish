@@ -533,8 +533,18 @@ class MenorahFishRequestHandler(http.server.SimpleHTTPRequestHandler):
                     "ai_male_uk": ("en", "co.uk"),
                     "ai_female_au": ("en", "com.au"),
                     "ai_male_au": ("en", "com.au"),
-                    "ai_spanish": ("es", "com"),
-                    "ai_french": ("fr", "fr")
+                    "ai_female_ca": ("en", "ca"),
+                    "ai_male_ca": ("en", "ca"),
+                    "ai_female_in": ("en", "co.in"),
+                    "ai_male_in": ("en", "co.in"),
+                    "ai_female_ie": ("en", "ie"),
+                    "ai_male_ie": ("en", "ie"),
+                    "ai_female_za": ("en", "co.za"),
+                    "ai_male_za": ("en", "co.za"),
+                    "ai_female_ng": ("en", "com.ng"),
+                    "ai_male_ng": ("en", "com.ng"),
+                    "ai_female_nz": ("en", "co.nz"),
+                    "ai_male_nz": ("en", "co.nz"),
                 }
                 lang, tld = tld_map.get(req_voice, ("en", "us"))
                 tts = gTTS(text=clean_text, lang=lang, tld=tld)
